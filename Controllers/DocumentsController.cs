@@ -46,7 +46,7 @@ public class DocumentsController : Controller
         }
 
         await using var stream = file.OpenReadStream();
-        await _ingestion.IngestAsync(file.FileName, stream, ct);
+        await _ingestion.IngestionAsync(file.FileName, stream, ct);
 
         TempData["UploadSuccess"] = $"'{file.FileName}' ingested successfully.";
         return RedirectToAction(nameof(Index));

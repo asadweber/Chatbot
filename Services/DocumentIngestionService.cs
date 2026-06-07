@@ -20,7 +20,7 @@ public class DocumentIngestionService : IDocumentIngestionService
         _logger = logger;
     }
 
-    public async Task<int> IngestAsync(string fileName, Stream content, CancellationToken ct = default)
+    public async Task<int> IngestionAsync(string fileName, Stream content, CancellationToken ct = default)
     {
         var text = ExtractText(fileName, content);
         var chunks = ChunkText(text);
