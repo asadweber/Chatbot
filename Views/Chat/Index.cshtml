@@ -1,0 +1,180 @@
+@model Chatbot.Models.ChatPageViewModel
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<style>
+    .list-group-item.active .session-title-link,
+    .list-group-item.active .session-title {
+        color: #fff;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3">
+        <form asp-action="NewSession" method="post" class="mb-3">
+            <button type="submit" class="btn btn-primary w-100">+ New chat</button>
+        </form>
+        <div class="list-group">
+            @foreach (var session in Model.Sessions)
+            {
+                var active = Model.ActiveSession?.Id == session.Id ? "active" : "";
+                <div class="list-group-item list-group-item-action @active d-flex justify-content-between align-items-center session-item">
+                    <a class="text-truncate flex-grow-1 me-2 session-title-link" asp-action="Index" asp-route-sessionId="@session.Id">
+                        <span class="session-title">@session.Title</span>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-secondary rename-session-btn"
+                            data-session-id="@session.Id" data-session-title="@session.Title">
+                        Rename
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger ms-1 delete-session-btn"
+                            data-session-id="@session.Id" data-session-title="@session.Title">
+                        Delete
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        @if (Model.ActiveSession is null)
+        {
+            <p class="text-muted">Select a chat session or start a new one.</p>
+        }
+        else
+        {
+            <div id="message-list" class="border rounded p-3 mb-3" style="height: 60vh; overflow-y: auto;">
+                @foreach (var message in Model.ActiveSession.Messages)
+                {
+                    var alignment = message.Role == "user" ? "text-end" : "text-start";
+                    var badgeClass = message.Role == "user" ? "bg-primary" : "bg-secondary";
+                    <div class="mb-2 @alignment">
+                        <span class="badge @badgeClass">@message.Role</span>
+                        <div>@message.Content</div>
+                    </div>
+                }
+            </div>
+
+            <form id="chat-form" class="d-flex gap-2">
+                <input type="hidden" id="session-id" value="@Model.ActiveSession.Id" />
+                <input type="text" id="message-input" class="form-control" placeholder="Ask a question..." autocomplete="off" />
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.rename-session-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const sessionId = btn.dataset.sessionId;
+                const currentTitle = btn.dataset.sessionTitle;
+                const newTitle = prompt('Rename chat session:', currentTitle);
+                if (newTitle === null) return;
+                const trimmed = newTitle.trim();
+                if (!trimmed || trimmed === currentTitle) return;
+
+                try {
+                    const response = await fetch('@Url.Action("RenameSession", "Chat")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId: parseInt(sessionId, 10), title: trimmed })
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        alert(text || 'Could not rename session.');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    btn.dataset.sessionTitle = data.title;
+                    const titleSpan = btn.parentElement.querySelector('.session-title');
+                    if (titleSpan) titleSpan.textContent = data.title;
+                } catch {
+                    alert('Could not reach the server.');
+                }
+            });
+        });
+
+        document.querySelectorAll('.delete-session-btn').forEach((btn) => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const sessionId = btn.dataset.sessionId;
+                const title = btn.dataset.sessionTitle;
+                if (!confirm(`Delete chat "${title}"? This cannot be undone.`)) return;
+
+                try {
+                    const response = await fetch('@Url.Action("DeleteSession", "Chat")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId: parseInt(sessionId, 10) })
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        alert(text || 'Could not delete session.');
+                        return;
+                    }
+
+                    window.location.href = '@Url.Action("Index", "Chat")';
+                } catch {
+                    alert('Could not reach the server.');
+                }
+            });
+        });
+
+        const form = document.getElementById('chat-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('message-input');
+                const sessionId = document.getElementById('session-id').value;
+                const message = input.value.trim();
+                if (!message) return;
+
+                const list = document.getElementById('message-list');
+                appendMessage(list, 'user', 'bg-primary', 'text-end', message);
+                input.value = '';
+                list.scrollTop = list.scrollHeight;
+
+                try {
+                    const response = await fetch('@Url.Action("Send", "Chat")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId: parseInt(sessionId, 10), message })
+                    });
+
+                    if (!response.ok) {
+                        const text = await response.text();
+                        appendMessage(list, 'error', 'bg-danger', 'text-start', text || 'Something went wrong.');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    appendMessage(list, 'assistant', 'bg-secondary', 'text-start', data.reply);
+                    list.scrollTop = list.scrollHeight;
+                } catch {
+                    appendMessage(list, 'error', 'bg-danger', 'text-start', 'Could not reach the server. Is Ollama running?');
+                }
+            });
+        }
+
+        function appendMessage(list, label, badgeClass, alignClass, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `mb-2 ${alignClass}`;
+
+            const badge = document.createElement('span');
+            badge.className = `badge ${badgeClass}`;
+            badge.textContent = label;
+
+            const body = document.createElement('div');
+            body.textContent = text;
+
+            wrapper.append(badge, body);
+            list.appendChild(wrapper);
+        }
+    </script>
+}

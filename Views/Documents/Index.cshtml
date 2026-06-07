@@ -1,0 +1,40 @@
+@model List<Chatbot.Models.Document>
+@{
+    ViewData["Title"] = "Documents";
+}
+
+<h1>Documents</h1>
+
+@if (TempData["UploadSuccess"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+@if (TempData["UploadError"] is string error)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data" class="d-flex gap-2 mb-4">
+    <input type="file" name="file" class="form-control" accept=".pdf,.txt,.md" required />
+    <button type="submit" class="btn btn-primary">Upload &amp; Ingest</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>File name</th>
+            <th>Uploaded</th>
+            <th>Chunks</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var document in Model)
+        {
+            <tr>
+                <td>@document.FileName</td>
+                <td>@document.UploadedAt.ToString("u")</td>
+                <td>@document.Chunks.Count</td>
+            </tr>
+        }
+    </tbody>
+</table>
