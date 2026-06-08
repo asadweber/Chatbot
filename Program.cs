@@ -76,7 +76,7 @@ app.MapStaticAssets();
 // Default MVC route: /{controller}/{action}/{id?}, defaulting to Home/Index.
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Chat}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 
