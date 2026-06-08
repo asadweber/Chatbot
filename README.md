@@ -59,6 +59,37 @@ Migrations/    EF Core database migrations
 Views/         Razor views (Home, Chat, Documents)
 ```
 
+## Endpoints
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/` | GET | Landing page (`HomeController.Index`) |
+| `/Documents` | GET | List uploaded documents and ingestion status |
+| `/Documents/Upload` | POST | Upload a file (`.pdf`/`.txt`/`.md`), triggers ingestion pipeline |
+| `/Chat?sessionId={id}` | GET | Open chat UI, optionally loading an existing session |
+| `/Chat/NewSession` | POST | Create a new empty chat session |
+| `/Chat/RenameSession` | POST (JSON) | Rename a session (`RenameSessionRequest`) |
+| `/Chat/DeleteSession` | POST (JSON) | Delete a session and its messages (`DeleteSessionRequest`) |
+| `/Chat/Send` | POST (JSON) | Submit a user message, run retrieval + generation, return assistant reply (`SendMessageRequest`) |
+
+## Data model
+
+```
+Document 1───* DocumentChunk        Document: Id, FileName, ContentType,
+                  │                            UploadedAt, chunk count
+                  └─ Embedding (Vector, 768d, pgvector column)
+
+ChatSession 1───* ChatMessage       ChatSession: Id, Title, CreatedAt
+                                    ChatMessage: Id, Role (user/assistant),
+                                                 Content, CreatedAt
+```
+
+Embeddings are stored as `Pgvector.Vector` columns (768 dimensions, matching
+`nomic-embed-text` output) and indexed for cosine-distance (`<=>`) similarity
+search — see `ApplicationDbContext.OnModelCreating` for the column/index setup
+and `RetrievalService` for the query that ranks `DocumentChunk` rows by
+distance to the question's embedding.
+
 ## Configuration
 
 Set in `appsettings.json` (or environment overrides / user secrets):
@@ -94,3 +125,25 @@ Set in `appsettings.json` (or environment overrides / user secrets):
    dotnet run
    ```
    Open the **Documents** page to upload material before chatting.
+
+## Troubleshooting
+
+- **Empty/irrelevant answers** — confirm documents finished ingesting (chunk
+  count > 0 on the Documents page) and that `nomic-embed-text` is pulled; a
+  missing embedding model causes silent ingestion failures.
+- **Connection refused to Ollama** — verify `ollama serve` is running and
+  `Ollama:Endpoint` matches its address (default `http://localhost:11434`).
+- **`relation "vector" does not exist` / migration errors** — the `pgvector`
+  extension must be created in the target database before running
+  `dotnet ef database update` (`CREATE EXTENSION IF NOT EXISTS vector;`).
+- **Slow retrieval on large corpora** — add an IVFFlat/HNSW index on the
+  `Embedding` column (see pgvector docs); the default sequential scan is fine
+  for small document sets but degrades as chunk counts grow.
+
+## Limitations & possible extensions
+
+- Single-user, no authentication — all sessions and documents are global.
+- Fixed chunk size/overlap and a single embedding model; no support for
+  re-ranking or hybrid (keyword + vector) search.
+- No streaming of assistant responses — replies are returned in one shot.
+- No deletion/re-ingestion workflow for documents (upload-only).
