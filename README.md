@@ -17,6 +17,28 @@ grounded in your own material instead of hallucinated from general knowledge.
 
 ## How it works
 
+```mermaid
+flowchart LR
+    subgraph Ingestion["📥 Ingestion (offline, per upload)"]
+        A[".pdf / .txt / .md"] --> B["Extract text<br/>(PdfPig / plain read)"]
+        B --> C["Split into ~500-char<br/>overlapping chunks"]
+        C --> D["Ollama embedding API<br/>(nomic-embed-text)"]
+        D --> E["768-dim vectors"]
+        E --> F[("PostgreSQL + pgvector<br/>Document / DocumentChunk")]
+    end
+
+    subgraph Chat["💬 Chat (per user message)"]
+        G["User question"] --> H["Ollama embedding API<br/>(nomic-embed-text)"]
+        H --> I["Question vector"]
+        I --> J["Cosine-distance search<br/>(<=> operator, top-K)"]
+        F -.retrieves.-> J
+        J --> K["Ranked chunks"]
+        K --> L["Grounded prompt:<br/>chunks + history + question"]
+        L --> M["Ollama chat model<br/>(llama3.1:8b via Semantic Kernel)"]
+        M --> N["Answer"]
+    end
+```
+
 1. **Ingestion** — user uploads a document (`.pdf`, `.txt`, `.md`). Text is
    extracted (PdfPig for PDFs, plain read for text formats), then recursively
    split into ~500-character overlapping chunks along paragraph/sentence/word
