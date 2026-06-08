@@ -5,8 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chatbot.Controllers;
 
+/// <summary>
+/// Manages the document library used for retrieval-augmented generation:
+/// lists ingested documents and handles new file uploads, validating type
+/// and size before delegating to <see cref="IDocumentIngestionService"/>.
+/// </summary>
 public class DocumentsController : Controller
 {
+    /// <summary>File extensions accepted for upload/ingestion.</summary>
     private static readonly string[] AllowedExtensions = { ".pdf", ".txt", ".md" };
 
     private readonly ApplicationDbContext _db;
@@ -18,6 +24,7 @@ public class DocumentsController : Controller
         _ingestion = ingestion;
     }
 
+    /// <summary>Lists all ingested documents (with their chunks loaded), newest first.</summary>
     public async Task<IActionResult> Index()
     {
         var documents = await _db.Documents
@@ -28,6 +35,11 @@ public class DocumentsController : Controller
         return View(documents);
     }
 
+    /// <summary>
+    /// Validates and ingests an uploaded file (PDF/TXT/MD, up to 50 MB),
+    /// surfacing success/validation errors via <c>TempData</c> for display
+    /// after the redirect back to <see cref="Index"/>.
+    /// </summary>
     [HttpPost]
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> Upload(IFormFile file, CancellationToken ct)
