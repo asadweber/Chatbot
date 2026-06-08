@@ -17,6 +17,8 @@ grounded in your own material instead of hallucinated from general knowledge.
 
 ## How it works
 
+![RAG pipeline](docs/rag-pipeline.png)
+
 1. **Ingestion** — user uploads a document (`.pdf`, `.txt`, `.md`). Text is
    extracted (PdfPig for PDFs, plain read for text formats), then recursively
    split into ~500-character overlapping chunks along paragraph/sentence/word
