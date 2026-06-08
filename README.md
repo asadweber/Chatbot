@@ -1,4 +1,4 @@
-# RAG Chatbot
+# Chatbot
 
 A self-hosted Retrieval-Augmented Generation (RAG) chat application built on
 ASP.NET Core. Upload your own documents (PDF, TXT, Markdown), then chat with
