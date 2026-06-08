@@ -1,0 +1,96 @@
+# RAG Chatbot
+
+A self-hosted Retrieval-Augmented Generation (RAG) chat application built on
+ASP.NET Core. Upload your own documents (PDF, TXT, Markdown), then chat with
+an LLM that grounds its answers in relevant excerpts retrieved from those
+documents — running entirely on local infrastructure via Ollama, with no data
+leaving your machine.
+
+## Purpose
+
+Plain LLM chat answers from the model's training data alone, which can be
+outdated, generic, or simply wrong about your private documents. This project
+implements a practical RAG pipeline: ingest documents, split them into chunks,
+embed those chunks as vectors, and at chat time retrieve the most semantically
+relevant chunks to feed back into the LLM as context — producing answers
+grounded in your own material instead of hallucinated from general knowledge.
+
+## How it works
+
+1. **Ingestion** — user uploads a document (`.pdf`, `.txt`, `.md`). Text is
+   extracted (PdfPig for PDFs, plain read for text formats), then recursively
+   split into ~500-character overlapping chunks along paragraph/sentence/word
+   boundaries to keep each chunk semantically coherent
+   (`DocumentIngestionService`).
+2. **Embedding** — each chunk is sent to a local Ollama embedding model
+   (`nomic-embed-text`), returning a 768-dimension vector. Chunks and vectors
+   are stored in PostgreSQL via the `pgvector` extension
+   (`OllamaEmbeddingService`, `ApplicationDbContext`).
+3. **Retrieval** — the user's question is embedded, and PostgreSQL performs a
+   cosine-distance nearest-neighbor search (`<=>` operator via
+   Pgvector.EntityFrameworkCore) to find the most relevant chunks
+   (`RetrievalService`).
+4. **Generation** — retrieved chunks, conversation history, and the question
+   are assembled into a grounded system prompt and sent to a local Ollama chat
+   model (`llama3.1:8b`) via Semantic Kernel (`OllamaChatService`).
+
+## Tech stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Web framework | ASP.NET Core MVC (.NET 10) | Controllers, Razor views, routing, DI |
+| Database | PostgreSQL + `pgvector` extension | Stores documents, chunks, embeddings, chat history |
+| Data access | EF Core + Npgsql + Pgvector.EntityFrameworkCore | ORM, vector column mapping, cosine-distance queries |
+| LLM orchestration | Microsoft Semantic Kernel | Kernel, chat completion & embedding generation abstractions |
+| LLM runtime | Ollama (local) | Hosts chat model (`llama3.1:8b`) and embedding model (`nomic-embed-text`) |
+| PDF parsing | UglyToad.PdfPig | Extracts text from uploaded PDF documents |
+
+## Project structure
+
+```
+Controllers/   HomeController (landing/error), ChatController (sessions & RAG chat),
+               DocumentsController (upload & ingestion)
+Services/      IChatService/OllamaChatService, IEmbeddingService/OllamaEmbeddingService,
+               IRetrievalService/RetrievalService,
+               IDocumentIngestionService/DocumentIngestionService
+Models/        EF entities (Document, DocumentChunk, ChatSession, ChatMessage) + view models
+Data/          ApplicationDbContext — EF Core context, pgvector config, relationships
+Migrations/    EF Core database migrations
+Views/         Razor views (Home, Chat, Documents)
+```
+
+## Configuration
+
+Set in `appsettings.json` (or environment overrides / user secrets):
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=<db>;Username=<user>;Password=<password>"
+  },
+  "Ollama": {
+    "Endpoint": "http://localhost:11434",
+    "ChatModel": "llama3.1:8b",
+    "EmbeddingModel": "nomic-embed-text"
+  }
+}
+```
+
+## Running locally
+
+1. Start a PostgreSQL instance with the `vector` extension available.
+2. Start Ollama and pull the configured models:
+   ```
+   ollama pull llama3.1:8b
+   ollama pull nomic-embed-text
+   ```
+3. Update the connection string and Ollama settings in `appsettings.json`.
+4. Apply EF Core migrations:
+   ```
+   dotnet ef database update
+   ```
+5. Run the app:
+   ```
+   dotnet run
+   ```
+   Open the **Documents** page to upload material before chatting.

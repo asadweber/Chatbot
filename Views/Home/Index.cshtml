@@ -2,6 +2,96 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+<div class="container my-4">
+    <h1 class="mb-3">Chatbot</h1>
+    <p class="lead">
+        A self-hosted Retrieval-Augmented Generation (RAG) chat application. Upload your own
+        documents (PDF, TXT, Markdown), then chat with an LLM that grounds its answers in the
+        relevant excerpts retrieved from those documents — running entirely on local infrastructure
+        via Ollama, with no data leaving your machine.
+    </p>
 
+    <h2 class="mt-4">Purpose</h2>
+    <p>
+        Traditional LLM chat answers from the model's training data alone, which can be outdated,
+        generic, or simply wrong about your own private documents. This project demonstrates a
+        practical RAG pipeline: it ingests documents, splits them into chunks, embeds those chunks
+        as vectors, and at chat time retrieves the most semantically relevant chunks to feed back
+        into the LLM as context — producing answers grounded in your own material rather than
+        hallucinated from general knowledge.
+    </p>
+
+    <h2 class="mt-4">How it works</h2>
+    <ol>
+        <li><strong>Ingestion</strong> &mdash; a user uploads a document (.pdf, .txt, .md). Text is
+            extracted (PdfPig for PDFs, plain read for text formats), then recursively split into
+            ~500-character overlapping chunks along paragraph/sentence/word boundaries to keep each
+            chunk semantically coherent.</li>
+        <li><strong>Embedding</strong> &mdash; each chunk is sent to a local Ollama embedding model
+            (<code>nomic-embed-text</code>) which returns a 768-dimension vector capturing its
+            meaning. Chunks and vectors are stored in PostgreSQL using the <code>pgvector</code>
+            extension.</li>
+        <li><strong>Retrieval</strong> &mdash; when the user asks a question, the question itself is
+            embedded, and PostgreSQL performs a cosine-distance nearest-neighbor search
+            (<code>&lt;=&gt;</code> operator via Pgvector.EntityFrameworkCore) to find the most
+            relevant chunks.</li>
+        <li><strong>Generation</strong> &mdash; the retrieved chunks, the conversation history, and
+            the user's question are assembled into a grounded prompt and sent to a local Ollama chat
+            model (<code>llama3.1:8b</code>) via Semantic Kernel, which produces the final answer.</li>
+    </ol>
+
+    <h2 class="mt-4">Tech stack</h2>
+    <table class="table table-sm table-bordered align-middle">
+        <thead>
+            <tr><th>Layer</th><th>Technology</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Web framework</td><td>ASP.NET Core MVC (.NET 10)</td><td>Controllers, Razor views, routing, DI</td></tr>
+            <tr><td>Database</td><td>PostgreSQL + <code>pgvector</code> extension</td><td>Stores documents, chunks, embeddings, chat history</td></tr>
+            <tr><td>Data access</td><td>Entity Framework Core + Npgsql + Pgvector.EntityFrameworkCore</td><td>ORM, vector column mapping, cosine-distance queries</td></tr>
+            <tr><td>LLM orchestration</td><td>Microsoft Semantic Kernel</td><td>Kernel, chat completion &amp; embedding generation abstractions</td></tr>
+            <tr><td>LLM runtime</td><td>Ollama (local)</td><td>Hosts the chat model (<code>llama3.1:8b</code>) and embedding model (<code>nomic-embed-text</code>)</td></tr>
+            <tr><td>PDF parsing</td><td>UglyToad.PdfPig</td><td>Extracts text from uploaded PDF documents</td></tr>
+        </tbody>
+    </table>
+
+    <h2 class="mt-4">Project structure</h2>
+    <ul>
+        <li><code>Controllers/</code> &mdash; <code>HomeController</code> (landing/error pages),
+            <code>ChatController</code> (session lifecycle &amp; RAG chat turns),
+            <code>DocumentsController</code> (upload &amp; ingestion)</li>
+        <li><code>Services/</code> &mdash; <code>IChatService</code>/<code>OllamaChatService</code>,
+            <code>IEmbeddingService</code>/<code>OllamaEmbeddingService</code>,
+            <code>IRetrievalService</code>/<code>RetrievalService</code>,
+            <code>IDocumentIngestionService</code>/<code>DocumentIngestionService</code></li>
+        <li><code>Models/</code> &mdash; EF entities (<code>Document</code>, <code>DocumentChunk</code>,
+            <code>ChatSession</code>, <code>ChatMessage</code>) and view models</li>
+        <li><code>Data/ApplicationDbContext.cs</code> &mdash; EF Core context, pgvector
+            configuration, entity relationships</li>
+        <li><code>Migrations/</code> &mdash; EF Core database migrations</li>
+    </ul>
+
+    <h2 class="mt-4">Configuration</h2>
+    <p>Set in <code>appsettings.json</code> (or environment-specific overrides / user secrets):</p>
+    <pre class="bg-light p-3 border rounded"><code>{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=&lt;db&gt;;Username=&lt;user&gt;;Password=&lt;password&gt;"
+  },
+  "Ollama": {
+    "Endpoint": "http://localhost:11434",
+    "ChatModel": "llama3.1:8b",
+    "EmbeddingModel": "nomic-embed-text"
+  }
+}</code></pre>
+
+    <h2 class="mt-4">Running locally</h2>
+    <ol>
+        <li>Start a PostgreSQL instance with the <code>vector</code> extension available.</li>
+        <li>Start Ollama and pull the configured models:
+            <code>ollama pull llama3.1:8b</code> and <code>ollama pull nomic-embed-text</code>.</li>
+        <li>Update the connection string and Ollama settings in <code>appsettings.json</code>.</li>
+        <li>Apply EF Core migrations: <code>dotnet ef database update</code>.</li>
+        <li>Run the app: <code>dotnet run</code>, then open the <strong>Documents</strong> page to
+            upload material before chatting.</li>
+    </ol>
 </div>
