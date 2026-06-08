@@ -9,11 +9,31 @@ leaving your machine.
 ## Purpose
 
 Plain LLM chat answers from the model's training data alone, which can be
-outdated, generic, or simply wrong about your private documents. This project
-implements a practical RAG pipeline: ingest documents, split them into chunks,
-embed those chunks as vectors, and at chat time retrieve the most semantically
-relevant chunks to feed back into the LLM as context — producing answers
-grounded in your own material instead of hallucinated from general knowledge.
+outdated, generic, or simply wrong about your private documents. Worse, the
+model has no way to say "I don't know your internal docs" — it will
+confidently fabricate plausible-sounding answers (hallucination) instead of
+admitting it lacks the relevant information.
+
+This project closes that gap with a practical RAG pipeline: ingest documents,
+split them into chunks, embed those chunks as vectors, and at chat time
+retrieve the most semantically relevant chunks to feed back into the LLM as
+context — producing answers grounded in your own material instead of
+hallucinated from general knowledge.
+
+Why this matters in practice:
+
+- **Up-to-date answers** — the model reasons over the documents you uploaded
+  today, not a training snapshot that may be months or years old.
+- **Domain/private knowledge** — works for material the base model never saw
+  (internal docs, manuals, notes, niche references) without fine-tuning.
+- **Traceable answers** — because responses are grounded in retrieved chunks,
+  it's possible to see *which* excerpts informed an answer, making the system
+  easier to trust and debug than an opaque end-to-end model.
+- **Privacy by design** — ingestion, embedding, retrieval, and generation all
+  run against a local Ollama instance and local PostgreSQL database; no
+  document content or chat history is sent to a third-party API.
+- **No retraining required** — adding new knowledge is as simple as uploading
+  a new document; there's no fine-tuning step or model redeployment.
 
 ## How it works
 
