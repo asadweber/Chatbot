@@ -2,6 +2,9 @@ using Chatbot.Data;
 using Chatbot.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
+using Serilog;
+using Application;
+using Infrastructure;
 
 // ============================================================================
 // Application entry point and composition root.
@@ -12,6 +15,19 @@ using Microsoft.SemanticKernel;
 // ============================================================================
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile(
+    Path.Combine(AppContext.BaseDirectory, "appsettings.json"),
+    optional: false, reloadOnChange: true);
+
+
+// Serilog config lives entirely in appsettings.json ("Serilog" section).
+builder.Services.AddSerilog(cfg => cfg.ReadFrom.Configuration(builder.Configuration));
+
+// Add services to the container.
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -20,8 +36,8 @@ builder.Services.AddControllersWithViews();
 // The connection string must be present in configuration (appsettings.json,
 // environment variables, user secrets, etc.). Failing fast here avoids a
 // confusing runtime error later when the DbContext is first resolved.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Missing connection string 'DefaultConnection'.");
+var connectionString = builder.Configuration.GetConnectionString("PostgresDefaultConnection")
+    ?? throw new InvalidOperationException("Missing connection string 'PostgresDefaultConnection'.");
 
 // Register the EF Core DbContext, enabling Npgsql's vector support so that
 // embedding columns (pgvector) can be mapped and queried (e.g. similarity

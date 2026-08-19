@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="src/Application.Dtos/Application.Dtos.csproj" />
+  <Project Path="src/Application/Application.csproj" />
   <Project Path="src/Chatbot.Api/Chatbot.Api.csproj" />
+  <Project Path="src/Domain/Domain.csproj" />
+  <Project Path="src/Infrastructure/Infrastructure.csproj" />
 </Solution>
