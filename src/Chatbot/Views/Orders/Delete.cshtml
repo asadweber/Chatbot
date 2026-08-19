@@ -15,7 +15,7 @@
         <div class="rounded-3 p-3 mb-4 summary-box">
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Customer</span>
-                <span class="fw-semibold text-purple">@Model.CustomerName</span>
+                <span class="fw-semibold text-gold">@Model.CustomerName</span>
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Order Date</span>
@@ -23,7 +23,7 @@
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Total Amount</span>
-                <span class="fw-bold text-pink">@Model.TotalAmount.ToString("C")</span>
+                <span class="fw-bold text-amber">@Model.TotalAmount.ToString("C")</span>
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Status</span>
@@ -38,24 +38,3 @@
         </form>
     </div>
 </div>
-
-<style>
-    .orders-hero {
-        background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
-        border-radius: 1rem;
-        padding: 1.75rem 2rem;
-        box-shadow: 0 10px 25px rgba(123, 47, 247, 0.25);
-    }
-    .accent-card { border-left: 5px solid transparent; border-radius: .6rem; overflow: hidden; }
-    .accent-red { border-left-color: #ff5858; }
-    .text-red { color: #ff5858; }
-    .text-purple { color: #7b2ff7; }
-    .text-pink { color: #f107a3; }
-    .summary-box { background: linear-gradient(135deg, #fff5f5, #fff0f6); border: 1px solid #ffe0e0; }
-    .btn-gradient-red {
-        background: linear-gradient(90deg, #f857a6, #ff5858);
-        border: none; color: #fff;
-        transition: transform .15s ease, box-shadow .15s ease;
-    }
-    .btn-gradient-red:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(255,88,88,.35); color: #fff; }
-</style>
