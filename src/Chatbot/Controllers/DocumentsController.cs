@@ -1,5 +1,5 @@
-using Chatbot.Data;
-using Chatbot.Services;
+using Application.Interfaces;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,9 +1,11 @@
-using Chatbot.Data;
-using Chatbot.Models;
+using Application.Interfaces;
+using Domain.Entities;
+using Infrastructure.Persistence;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using UglyToad.PdfPig;
 
-namespace Chatbot.Services;
+namespace Infrastructure.Services;
 
 /// <summary>
 /// <see cref="IDocumentIngestionService"/> implementation: extracts text from

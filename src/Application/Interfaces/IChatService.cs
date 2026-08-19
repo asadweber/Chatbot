@@ -1,4 +1,4 @@
-namespace Chatbot.Services;
+namespace Application.Interfaces;
 
 /// <summary>
 /// Generates assistant chat responses, grounding the LLM in retrieved

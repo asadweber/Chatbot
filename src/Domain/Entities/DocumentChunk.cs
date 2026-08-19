@@ -1,6 +1,6 @@
 using Pgvector;
 
-namespace Chatbot.Models;
+namespace Domain.Entities;
 
 /// <summary>
 /// A chunk of text extracted from a source <see cref="Document"/>, together

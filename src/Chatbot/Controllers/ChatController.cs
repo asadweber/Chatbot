@@ -1,6 +1,7 @@
-using Chatbot.Data;
-using Chatbot.Models;
-using Chatbot.Services;
+using Application.Dtos;
+using Application.Interfaces;
+using Domain.Entities;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

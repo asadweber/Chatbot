@@ -1,6 +1,6 @@
 using Pgvector;
 
-namespace Chatbot.Services;
+namespace Application.Interfaces;
 
 /// <summary>
 /// Generates vector embeddings for text, used both when ingesting document

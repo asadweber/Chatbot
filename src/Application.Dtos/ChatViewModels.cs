@@ -1,4 +1,6 @@
-namespace Chatbot.Models;
+using Domain.Entities;
+
+namespace Application.Dtos;
 
 /// <summary>
 /// View model for the main chat page: the list of sessions for the sidebar

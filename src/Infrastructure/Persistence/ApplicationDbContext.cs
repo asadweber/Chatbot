@@ -1,7 +1,7 @@
-using Chatbot.Models;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Chatbot.Data;
+namespace Infrastructure.Persistence;
 
 /// <summary>
 /// EF Core database context for the chatbot: documents/chunks (with pgvector

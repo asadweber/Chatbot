@@ -2,10 +2,6 @@ using Application.Dtos;
 using Application.Interfaces;
 using AutoMapper;
 using Domain;
-using Domain.Entities;
-using MassTransit;
-using Microsoft.EntityFrameworkCore;
-using static MassTransit.ValidationResultExtensions;
 
 namespace Application.Services;
 

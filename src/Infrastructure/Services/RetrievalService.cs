@@ -1,8 +1,9 @@
-using Chatbot.Data;
+using Application.Interfaces;
+using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 
-namespace Chatbot.Services;
+namespace Infrastructure.Services;
 
 /// <summary>
 /// <see cref="IRetrievalService"/> implementation that embeds the query and

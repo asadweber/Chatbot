@@ -1,7 +1,8 @@
+using Application.Interfaces;
 using Microsoft.SemanticKernel.Embeddings;
 using Pgvector;
 
-namespace Chatbot.Services;
+namespace Infrastructure.Services;
 
 /// <summary>
 /// <see cref="IEmbeddingService"/> implementation backed by a Semantic Kernel

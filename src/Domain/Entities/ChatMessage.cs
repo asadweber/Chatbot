@@ -1,4 +1,4 @@
-namespace Chatbot.Models;
+namespace Domain.Entities;
 
 /// <summary>
 /// A single message within a <see cref="ChatSession"/>, authored either by

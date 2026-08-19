@@ -5,7 +5,7 @@ using Pgvector;
 
 #nullable disable
 
-namespace Chatbot.Migrations
+namespace Infrastructure.Migrations.Chat
 {
     /// <inheritdoc />
     public partial class Init : Migration

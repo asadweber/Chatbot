@@ -1,4 +1,4 @@
-namespace Chatbot.Models;
+namespace Domain.Entities;
 
 /// <summary>
 /// A source document uploaded for ingestion (e.g. PDF, TXT, Markdown), split

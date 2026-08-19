@@ -1,4 +1,4 @@
-namespace Chatbot.Services;
+namespace Application.Interfaces;
 
 /// <summary>
 /// Ingests an uploaded document: extracts its text, splits it into chunks,

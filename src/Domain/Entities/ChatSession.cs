@@ -1,4 +1,4 @@
-namespace Chatbot.Models;
+namespace Domain.Entities;
 
 /// <summary>
 /// A chat conversation: an ordered collection of <see cref="ChatMessage"/>

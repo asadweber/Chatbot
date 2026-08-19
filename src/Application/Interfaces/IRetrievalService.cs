@@ -1,4 +1,4 @@
-namespace Chatbot.Services;
+namespace Application.Interfaces;
 
 /// <summary>
 /// Retrieves the document chunks most relevant to a query, for use as
