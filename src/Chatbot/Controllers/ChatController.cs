@@ -49,7 +49,7 @@ public class ChatController : Controller
     /// an empty title and 404 if the session doesn't exist.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> RenameSession([FromBody] RenameSessionRequest request, CancellationToken ct)
+    public async Task<IActionResult> RenameSession([FromBody] RenameSessionRequestDto request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Title))
             return BadRequest("Title cannot be empty.");
@@ -63,7 +63,7 @@ public class ChatController : Controller
 
     /// <summary>Deletes a session and (via cascade delete) its messages.</summary>
     [HttpPost]
-    public async Task<IActionResult> DeleteSession([FromBody] DeleteSessionRequest request, CancellationToken ct)
+    public async Task<IActionResult> DeleteSession([FromBody] DeleteSessionRequestDto request, CancellationToken ct)
     {
         var deleted = await _chatSessions.DeleteSessionAsync(request.SessionId, ct);
         if (!deleted)
