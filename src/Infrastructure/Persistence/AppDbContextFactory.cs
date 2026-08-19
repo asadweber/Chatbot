@@ -9,7 +9,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         optionsBuilder.UseSqlServer(
-            "Server=localhost;Database=OrderDB;User Id=sa;Password=Asdf1234;" +
+            "Server=localhost;Database=RagRdbms;User Id=sa;Password=Asdf1234;" +
             "Connect Timeout=30;Min Pool Size=5;Max Pool Size=100;TrustServerCertificate=True;");
 
         return new AppDbContext(optionsBuilder.Options);
