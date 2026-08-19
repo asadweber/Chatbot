@@ -13,6 +13,5 @@ public class OrderDto
 
     public List<OrderDetailDto> OrderDetails { get; set; } = [];
 
-    public OrderNotificationDto? OrderNotification { get; set; }
 
 }
