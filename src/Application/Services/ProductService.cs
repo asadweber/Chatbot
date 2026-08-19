@@ -9,7 +9,7 @@ using static MassTransit.ValidationResultExtensions;
 
 namespace Application.Services;
 
-public class ProductService(IUnitOfWork uow, IPublishEndpoint bus, IMapper mapper) : IProductService
+public class ProductService(IUnitOfWork uow, IMapper mapper) : IProductService
 {
    
     public async Task<bool> HasSufficientStockAsync(long productId, long qty)
