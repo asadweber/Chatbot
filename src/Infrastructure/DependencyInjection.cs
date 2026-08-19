@@ -34,7 +34,7 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("PostgresDefaultConnection")
             ?? throw new InvalidOperationException("Missing connection string 'PostgresDefaultConnection'.");
 
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddDbContext<VectorDbContext>(options =>
             options.UseNpgsql(connectionString, npgsql => npgsql.UseVector()));
 
         var ollamaSection = configuration.GetSection("Ollama");

@@ -23,11 +23,11 @@ public class DocumentIngestionService : IDocumentIngestionService
     private const int ChunkSize = 1000;
     private const int ChunkOverlap = 200;
 
-    private readonly ApplicationDbContext _db;
+    private readonly VectorDbContext _db;
     private readonly IEmbeddingService _embeddings;
     private readonly ILogger<DocumentIngestionService> _logger;
 
-    public DocumentIngestionService(ApplicationDbContext db, IEmbeddingService embeddings, ILogger<DocumentIngestionService> logger)
+    public DocumentIngestionService(VectorDbContext db, IEmbeddingService embeddings, ILogger<DocumentIngestionService> logger)
     {
         _db = db;
         _embeddings = embeddings;

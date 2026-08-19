@@ -15,10 +15,10 @@ public class DocumentsController : Controller
     /// <summary>File extensions accepted for upload/ingestion.</summary>
     private static readonly string[] AllowedExtensions = { ".pdf", ".txt", ".md" };
 
-    private readonly ApplicationDbContext _db;
+    private readonly VectorDbContext _db;
     private readonly IDocumentIngestionService _ingestion;
 
-    public DocumentsController(ApplicationDbContext db, IDocumentIngestionService ingestion)
+    public DocumentsController(VectorDbContext db, IDocumentIngestionService ingestion)
     {
         _db = db;
         _ingestion = ingestion;

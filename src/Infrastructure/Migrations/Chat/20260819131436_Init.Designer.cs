@@ -12,7 +12,7 @@ using Pgvector;
 
 namespace Infrastructure.Migrations.Chat
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(VectorDbContext))]
     [Migration("20260819131436_Init")]
     partial class Init
     {

@@ -12,10 +12,10 @@ namespace Application.Services;
 /// </summary>
 public class RetrievalService : IRetrievalService
 {
-    private readonly ApplicationDbContext _db;
+    private readonly VectorDbContext _db;
     private readonly IEmbeddingService _embeddings;
 
-    public RetrievalService(ApplicationDbContext db, IEmbeddingService embeddings)
+    public RetrievalService(VectorDbContext db, IEmbeddingService embeddings)
     {
         _db = db;
         _embeddings = embeddings;

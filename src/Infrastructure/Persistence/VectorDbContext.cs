@@ -9,9 +9,9 @@ namespace Infrastructure.Persistence;
 /// and messages. Backed by PostgreSQL with the <c>vector</c> extension via
 /// Npgsql + Pgvector.EntityFrameworkCore.
 /// </summary>
-public class ApplicationDbContext : DbContext
+public class VectorDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    public VectorDbContext(DbContextOptions<VectorDbContext> options) : base(options) { }
 
     /// <summary>Uploaded source documents.</summary>
     public DbSet<Document> Documents => Set<Document>();

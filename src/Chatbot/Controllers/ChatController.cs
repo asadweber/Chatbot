@@ -15,11 +15,11 @@ namespace Chatbot.Controllers;
 /// </summary>
 public class ChatController : Controller
 {
-    private readonly ApplicationDbContext _db;
+    private readonly VectorDbContext _db;
     private readonly IRetrievalService _retrieval;
     private readonly IChatService _chat;
 
-    public ChatController(ApplicationDbContext db, IRetrievalService retrieval, IChatService chat)
+    public ChatController(VectorDbContext db, IRetrievalService retrieval, IChatService chat)
     {
         _db = db;
         _retrieval = retrieval;
