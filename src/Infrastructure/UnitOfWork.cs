@@ -12,9 +12,11 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
 
     private IOrderRepository? _orders;
     private IProductRepository? _products;
+    private ICustomerRepository? _customers;
 
     public IOrderRepository Orders => _orders ??= new OrderRepository(context);
     public IProductRepository Products => _products ??= new ProductRepository(context);
+    public ICustomerRepository Customers => _customers ??= new CustomerRepository(context);
 
     public Task<int> SaveChangesAsync() => context.SaveChangesAsync();
 
