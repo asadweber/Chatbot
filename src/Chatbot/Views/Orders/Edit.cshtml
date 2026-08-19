@@ -3,49 +3,75 @@
     ViewData["Title"] = "Edit Order";
 }
 
-<h1>Edit Order</h1>
+<div class="mb-4">
+    <a asp-action="Index" class="text-decoration-none text-muted small">&larr; Back to Orders</a>
+    <h1 class="h3 mt-2 mb-1 fw-semibold">Edit Order #@Model.Id</h1>
+    <p class="text-muted mb-0">Update order information and line items</p>
+</div>
 
 <form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="orderForm">
     <input type="hidden" asp-for="Id" />
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="form-group mb-2">
-        <label asp-for="CustomerId" class="control-label"></label>
-        @await Component.InvokeAsync("CustomerSelect", new { selectedId = Model.CustomerId, selectedText = Model.CustomerName })
-        <span asp-validation-for="CustomerId" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-2">
-        <label asp-for="OrderDate" class="control-label"></label>
-        <input asp-for="OrderDate" type="datetime-local" class="form-control" />
-        <span asp-validation-for="OrderDate" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-2">
-        <label asp-for="Status" class="control-label"></label>
-        <input asp-for="Status" class="form-control" />
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h2 class="h6 fw-semibold mb-0">Order Information</h2>
+        </div>
+        <div class="card-body px-4 pb-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="CustomerId" class="form-label small fw-semibold text-muted">Customer</label>
+                    @await Component.InvokeAsync("CustomerSelect", new { selectedId = Model.CustomerId, selectedText = Model.CustomerName })
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="OrderDate" class="form-label small fw-semibold text-muted">Order Date</label>
+                    <input asp-for="OrderDate" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="OrderDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Status" class="form-label small fw-semibold text-muted">Status</label>
+                    <input asp-for="Status" class="form-control" />
+                </div>
+            </div>
+        </div>
     </div>
 
-    <h3 class="mt-4">Order Details</h3>
-    <table class="table table-sm" id="orderDetailsTable">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <button type="button" id="addRowBtn" class="btn btn-outline-secondary btn-sm mb-3">+ Add Line</button>
-
-    <div class="form-group mb-3">
-        <label class="control-label">Total Amount</label>
-        <input id="totalAmount" class="form-control" readonly />
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+            <h2 class="h6 fw-semibold mb-0">Order Details</h2>
+            <button type="button" id="addRowBtn" class="btn btn-sm btn-outline-primary">+ Add Line</button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-sm align-middle mb-0" id="orderDetailsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Product</th>
+                        <th style="width:100px">Qty</th>
+                        <th style="width:130px">Unit Price</th>
+                        <th style="width:130px">Total</th>
+                        <th style="width:50px"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white border-0 px-4 py-3 d-flex justify-content-end align-items-center">
+            <span class="text-muted small fw-semibold me-3">Total Amount</span>
+            <input id="totalAmount" class="form-control form-control-sm text-end fw-semibold" style="width:150px" readonly />
+        </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+        <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+    </div>
 </form>
+
+<style>
+    #orderDetailsTable td { padding: 0.6rem 0.75rem; }
+    #orderDetailsTable td:first-child { padding-left: 1.5rem; }
+</style>
 
 @section Scripts {
     <script src="~/lib/select2/js/select2.full.min.js"></script>
@@ -72,8 +98,6 @@
             }
 
             function addRow(existing) {
-                console.log(existing);
-
                 var i = rowIndex++;
                 var selectId = 'productSelect_' + i;
                 var qty = existing ? existing.OrderQty : 1;
@@ -82,11 +106,11 @@
 
                 var row = $(
                     '<tr>' +
-                    '<td><select id="' + selectId + '" class="form-control product-select" name="OrderDetails[' + i + '].ProductId"></select></td>' +
-                    '<td><input type="number" min="1" value="' + qty + '" class="form-control qty-input" name="OrderDetails[' + i + '].OrderQty" /></td>' +
-                    '<td><input type="number" step="0.01" value="' + price + '" class="form-control price-input" name="OrderDetails[' + i + '].UnitPrice" /></td>' +
-                    '<td><span class="total-cell">' + Number(total).toFixed(2) + '</span><input type="hidden" class="total-input" name="OrderDetails[' + i + '].Total" value="' + total + '" /></td>' +
-                    '<td><button type="button" class="btn btn-outline-danger btn-sm remove-row-btn">&times;</button></td>' +
+                    '<td class="ps-4"><select id="' + selectId + '" class="form-control product-select" name="OrderDetails[' + i + '].ProductId"></select></td>' +
+                    '<td><input type="number" min="1" value="' + qty + '" class="form-control form-control-sm qty-input" name="OrderDetails[' + i + '].OrderQty" /></td>' +
+                    '<td><input type="number" step="0.01" value="' + price + '" class="form-control form-control-sm price-input" name="OrderDetails[' + i + '].UnitPrice" /></td>' +
+                    '<td><span class="total-cell fw-semibold">' + Number(total).toFixed(2) + '</span><input type="hidden" class="total-input" name="OrderDetails[' + i + '].Total" value="' + total + '" /></td>' +
+                    '<td><button type="button" class="btn btn-sm btn-outline-danger remove-row-btn">&times;</button></td>' +
                     '</tr>'
                 );
 

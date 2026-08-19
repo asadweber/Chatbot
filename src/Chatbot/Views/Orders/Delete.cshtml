@@ -3,25 +3,38 @@
     ViewData["Title"] = "Delete Order";
 }
 
-<h1>Delete Order</h1>
+<div class="mb-4">
+    <a asp-action="Index" class="text-decoration-none text-muted small">&larr; Back to Orders</a>
+</div>
 
-<h3>Are you sure you want to delete this?</h3>
-<dl class="row">
-    <dt class="col-sm-2">Customer</dt>
-    <dd class="col-sm-10">@Model.CustomerName</dd>
+<div class="card shadow-sm border-0" style="max-width:560px;">
+    <div class="card-body p-4">
+        <h1 class="h4 fw-semibold mb-1">Delete Order #@Model.Id</h1>
+        <p class="text-muted">This action cannot be undone. Please confirm you want to delete this order.</p>
 
-    <dt class="col-sm-2">Order Date</dt>
-    <dd class="col-sm-10">@Model.OrderDate.ToString("u")</dd>
+        <div class="border rounded-3 p-3 mb-4 bg-light-subtle">
+            <div class="d-flex justify-content-between py-1">
+                <span class="text-muted small">Customer</span>
+                <span class="fw-semibold">@Model.CustomerName</span>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+                <span class="text-muted small">Order Date</span>
+                <span class="fw-semibold">@Model.OrderDate.ToString("MMM d, yyyy HH:mm")</span>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+                <span class="text-muted small">Total Amount</span>
+                <span class="fw-semibold">@Model.TotalAmount.ToString("C")</span>
+            </div>
+            <div class="d-flex justify-content-between py-1">
+                <span class="text-muted small">Status</span>
+                <span class="fw-semibold">@Model.Status</span>
+            </div>
+        </div>
 
-    <dt class="col-sm-2">Total Amount</dt>
-    <dd class="col-sm-10">@Model.TotalAmount.ToString("C")</dd>
-
-    <dt class="col-sm-2">Status</dt>
-    <dd class="col-sm-10">@Model.Status</dd>
-</dl>
-
-<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger px-4">Delete Order</button>
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+        </form>
+    </div>
+</div>
