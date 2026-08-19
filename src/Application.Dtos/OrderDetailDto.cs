@@ -6,6 +6,7 @@ public class OrderDetailDto
     public long Id { get; set; }
     public long OrderId { get; set; }
     public long ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
     public long OrderQty { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal Total { get; set; }

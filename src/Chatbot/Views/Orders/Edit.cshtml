@@ -5,22 +5,142 @@
 
 <h1>Edit Order</h1>
 
-<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="orderForm">
     <input type="hidden" asp-for="Id" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group mb-2">
         <label asp-for="CustomerId" class="control-label"></label>
-        @await Component.InvokeAsync("CustomerSelect", new { selectedId = Model.CustomerId, selectedText = Model.CustomerId.ToString() })
+        @await Component.InvokeAsync("CustomerSelect", new { selectedId = Model.CustomerId, selectedText = Model.CustomerName })
         <span asp-validation-for="CustomerId" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-2">
+        <label asp-for="OrderDate" class="control-label"></label>
+        <input asp-for="OrderDate" type="datetime-local" class="form-control" />
+        <span asp-validation-for="OrderDate" class="text-danger"></span>
     </div>
     <div class="form-group mb-2">
         <label asp-for="Status" class="control-label"></label>
         <input asp-for="Status" class="form-control" />
     </div>
+
+    <h3 class="mt-4">Order Details</h3>
+    <table class="table table-sm" id="orderDetailsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button type="button" id="addRowBtn" class="btn btn-outline-secondary btn-sm mb-3">+ Add Line</button>
+
+    <div class="form-group mb-3">
+        <label class="control-label">Total Amount</label>
+        <input id="totalAmount" class="form-control" readonly />
+    </div>
+
     <button type="submit" class="btn btn-primary">Save</button>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </form>
 
 @section Scripts {
     <script src="~/lib/select2/js/select2.full.min.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var existingDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.OrderDetails));
+            var rowIndex = 0;
+
+            function recalcRow(row) {
+                var qty = parseFloat(row.find('.qty-input').val()) || 0;
+                var price = parseFloat(row.find('.price-input').val()) || 0;
+                var total = qty * price;
+                row.find('.total-cell').text(total.toFixed(2));
+                row.find('.total-input').val(total.toFixed(2));
+                recalcTotalAmount();
+            }
+
+            function recalcTotalAmount() {
+                var sum = 0;
+                $('#orderDetailsTable .total-input').each(function () {
+                    sum += parseFloat($(this).val()) || 0;
+                });
+                $('#totalAmount').val(sum.toFixed(2));
+            }
+
+            function addRow(existing) {
+                var i = rowIndex++;
+                var selectId = 'productSelect_' + i;
+                var qty = existing ? existing.OrderQty : 1;
+                var price = existing ? existing.UnitPrice : '';
+                var total = existing ? existing.Total : 0;
+
+                var row = $(
+                    '<tr>' +
+                    '<td><select id="' + selectId + '" class="form-control product-select" name="OrderDetails[' + i + '].ProductId"></select></td>' +
+                    '<td><input type="number" min="1" value="' + qty + '" class="form-control qty-input" name="OrderDetails[' + i + '].OrderQty" /></td>' +
+                    '<td><input type="number" step="0.01" value="' + price + '" class="form-control price-input" name="OrderDetails[' + i + '].UnitPrice" /></td>' +
+                    '<td><span class="total-cell">' + Number(total).toFixed(2) + '</span><input type="hidden" class="total-input" name="OrderDetails[' + i + '].Total" value="' + total + '" /></td>' +
+                    '<td><button type="button" class="btn btn-outline-danger btn-sm remove-row-btn">&times;</button></td>' +
+                    '</tr>'
+                );
+
+                $('#orderDetailsTable tbody').append(row);
+
+                var select2Options = {
+                    theme: 'bootstrap',
+                    placeholder: 'Select a product',
+                    ajax: {
+                        url: '@Url.Action("Search", "Products")',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return { q: params.term, page: params.page || 1 };
+                        },
+                        processResults: function (data, params) {
+                            params.page = params.page || 1;
+                            return { results: data.results, pagination: data.pagination };
+                        },
+                        cache: true
+                    },
+                    minimumInputLength: 0
+                };
+
+                if (existing) {
+                    var initialOption = new Option(existing.ProductName, existing.ProductId, true, true);
+                    row.find('.product-select').append(initialOption);
+                }
+
+                row.find('.product-select').select2(select2Options);
+
+                row.find('.product-select').on('select2:select', function (e) {
+                    var price = e.params.data.price;
+                    if (price !== undefined) {
+                        row.find('.price-input').val(price);
+                        recalcRow(row);
+                    }
+                });
+
+                row.find('.qty-input, .price-input').on('input', function () {
+                    recalcRow(row);
+                });
+
+                row.find('.remove-row-btn').on('click', function () {
+                    row.remove();
+                    recalcTotalAmount();
+                });
+            }
+
+            $('#addRowBtn').on('click', function () { addRow(null); });
+
+            if (existingDetails.length > 0) {
+                existingDetails.forEach(function (d) { addRow(d); });
+            } else {
+                addRow(null);
+            }
+        });
+    </script>
 }

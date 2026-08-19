@@ -6,8 +6,8 @@
 <h1>Order Details</h1>
 
 <dl class="row">
-    <dt class="col-sm-2">Customer Id</dt>
-    <dd class="col-sm-10">@Model.CustomerId</dd>
+    <dt class="col-sm-2">Customer</dt>
+    <dd class="col-sm-10">@Model.CustomerName</dd>
 
     <dt class="col-sm-2">Order Date</dt>
     <dd class="col-sm-10">@Model.OrderDate.ToString("u")</dd>
@@ -23,7 +23,7 @@
 <table class="table table-sm">
     <thead>
         <tr>
-            <th>Product Id</th>
+            <th>Product</th>
             <th>Qty</th>
             <th>Unit Price</th>
             <th>Total</th>
@@ -33,7 +33,7 @@
         @foreach (var detail in Model.OrderDetails)
         {
             <tr>
-                <td>@detail.ProductId</td>
+                <td>@detail.ProductName</td>
                 <td>@detail.OrderQty</td>
                 <td>@detail.UnitPrice.ToString("C")</td>
                 <td>@detail.Total.ToString("C")</td>
