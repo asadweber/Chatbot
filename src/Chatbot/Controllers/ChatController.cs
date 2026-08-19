@@ -33,7 +33,7 @@ public class ChatController : Controller
             ? await _chatSessions.GetSessionWithMessagesAsync(sessionId.Value, ct)
             : null;
 
-        return View(new ChatPageViewModel { Sessions = sessions.ToList(), ActiveSession = active });
+        return View(new ChatPageViewModelDto { Sessions = sessions.ToList(), ActiveSession = active });
     }
 
     /// <summary>Creates an empty chat session and redirects to it.</summary>
@@ -79,7 +79,7 @@ public class ChatController : Controller
     /// and that retrieved context, then persists the assistant's reply too.
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Send([FromBody] SendMessageRequest request, CancellationToken ct)
+    public async Task<IActionResult> Send([FromBody] SendMessageRequestDto request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Message))
             return BadRequest("Message cannot be empty.");
@@ -88,6 +88,6 @@ public class ChatController : Controller
         if (reply is null)
             return NotFound("Chat session not found.");
 
-        return Json(new SendMessageResponse { Reply = reply });
+        return Json(new SendMessageResponseDto { Reply = reply });
     }
 }
