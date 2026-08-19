@@ -1,8 +1,6 @@
-dotnet ef migrations add Init --project src/Infrastructure --startup-project src/Chatbot --context AppDbContext
+dotnet ef migrations add InitSql --project src/Infrastructure --startup-project src/Chatbot --context AppDbContext
+dotnet ef migrations add InitVector --project src/Infrastructure --startup-project src/Chatbot --context VectorDbContext
+
 
 dotnet ef database update --project src/Infrastructure --startup-project src/Chatbot --context AppDbContext
-
-
-dotnet ef migrations add Init --project src/Chatbot --startup-project src/Chatbot --context VectorDbContext
-
-dotnet ef database update --project src/Chatbot --startup-project src/Chatbot --context VectorDbContext
+dotnet ef database update --project src/Infrastructure --startup-project src/Chatbot --context VectorDbContext
