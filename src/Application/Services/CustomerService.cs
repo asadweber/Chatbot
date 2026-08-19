@@ -27,4 +27,27 @@ public class CustomerService(IUnitOfWork uow, IMapper mapper) : ICustomerService
         await uow.SaveChangesAsync();
         return mapper.Map<CustomerDto>(customer);
     }
+
+    public async Task<bool> UpdateAsync(int id, CustomerDto dto)
+    {
+        if (id != dto.Id) return false;
+
+        var existing = await uow.Customers.GetByIdAsync(id);
+        if (existing is null) return false;
+
+        mapper.Map(dto, existing);
+        await uow.Customers.Update(existing);
+        await uow.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var customer = await uow.Customers.GetByIdAsync(id);
+        if (customer is null) return false;
+
+        uow.Customers.Remove(customer);
+        await uow.SaveChangesAsync();
+        return true;
+    }
 }

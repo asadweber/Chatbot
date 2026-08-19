@@ -6,7 +6,6 @@ namespace Application.Dtos;
 public class OrderDto
 {
     public long Id { get; set; }
-    public string CustomerName { get; set; } = string.Empty;
     public int CustomerId { get; set; }
     public DateTime OrderDate { get; set; }
     public decimal TotalAmount { get; set; }
