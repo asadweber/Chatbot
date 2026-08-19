@@ -13,15 +13,15 @@ using Pgvector;
 namespace Chatbot.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260607102844_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260819125856_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.8")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
