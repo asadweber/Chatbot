@@ -21,12 +21,12 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0 mb-4 accent-card accent-purple">
+<div class="card shadow-sm border-0 mb-4 accent-card accent-gold">
     <div class="card-body p-4">
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="text-muted small fw-semibold">Customer</div>
-                <div class="fs-5 fw-semibold text-purple">@Model.CustomerName</div>
+                <div class="fs-5 fw-semibold text-gold">@Model.CustomerName</div>
             </div>
             <div class="col-md-4">
                 <div class="text-muted small fw-semibold">Order Date</div>
@@ -34,15 +34,15 @@
             </div>
             <div class="col-md-4">
                 <div class="text-muted small fw-semibold">Total Amount</div>
-                <div class="fs-5 fw-bold text-pink">@Model.TotalAmount.ToString("C")</div>
+                <div class="fs-5 fw-bold text-amber">@Model.TotalAmount.ToString("C")</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card shadow-sm border-0 mb-4 accent-card accent-pink">
+<div class="card shadow-sm border-0 mb-4 accent-card accent-amber">
     <div class="card-header bg-white border-0 pt-4 px-4">
-        <h2 class="h6 fw-bold mb-0 text-pink">Order Details</h2>
+        <h2 class="h6 fw-bold mb-0 text-amber">Order Details</h2>
     </div>
     <div class="card-body p-0">
         <table class="table align-middle mb-0">
@@ -61,32 +61,10 @@
                         <td class="ps-4">@detail.ProductName</td>
                         <td>@detail.OrderQty</td>
                         <td>@detail.UnitPrice.ToString("C")</td>
-                        <td class="pe-4 text-end fw-bold text-purple">@detail.Total.ToString("C")</td>
+                        <td class="pe-4 text-end fw-bold text-gold">@detail.Total.ToString("C")</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .orders-hero {
-        background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
-        border-radius: 1rem;
-        padding: 1.75rem 2rem;
-        box-shadow: 0 10px 25px rgba(123, 47, 247, 0.25);
-    }
-    .btn-hero { background: #fff; color: #7b2ff7; border: none; transition: transform .15s ease; }
-    .btn-hero:hover { transform: translateY(-1px); color: #7b2ff7; }
-    .accent-card { border-left: 5px solid transparent; border-radius: .6rem; overflow: hidden; }
-    .accent-purple { border-left-color: #7b2ff7; }
-    .accent-pink { border-left-color: #f107a3; }
-    .text-purple { color: #7b2ff7; }
-    .text-pink { color: #f107a3; }
-    .orders-hero thead, table thead { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); }
-    .card thead th { color: #fff; border: none; padding: 0.9rem 1rem; }
-    .badge-status-pending { background: linear-gradient(90deg,#f6d365,#fda085); color: #7a4a00; }
-    .badge-status-completed { background: linear-gradient(90deg,#43e97b,#38f9d7); color: #05512f; }
-    .badge-status-cancelled { background: linear-gradient(90deg,#f857a6,#ff5858); color: #fff; }
-    .badge { padding: 0.5em 0.9em; font-weight: 600; }
-</style>
