@@ -4,41 +4,62 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chatbot.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class CustomersController(ICustomerService customerService) : ControllerBase
+public class CustomersController(ICustomerService customerService) : Controller
 {
-    [HttpGet]
-    public async Task<ActionResult<List<CustomerDto>>> GetAll()
+    public async Task<IActionResult> Index()
     {
-        return Ok(await customerService.GetAllAsync());
+        var customers = await customerService.GetAllAsync();
+        return View(customers);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<CustomerDto>> GetById(int id)
+    public async Task<IActionResult> Details(int id)
     {
         var customer = await customerService.GetByIdAsync(id);
-        return customer is null ? NotFound() : Ok(customer);
+        return customer is null ? NotFound() : View(customer);
+    }
+
+    public IActionResult Create()
+    {
+        return View(new CustomerDto());
     }
 
     [HttpPost]
-    public async Task<ActionResult<CustomerDto>> Create(CustomerDto dto)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CustomerDto dto)
     {
-        var created = await customerService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+        if (!ModelState.IsValid) return View(dto);
+
+        await customerService.CreateAsync(dto);
+        return RedirectToAction(nameof(Index));
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, CustomerDto dto)
+    public async Task<IActionResult> Edit(int id)
     {
+        var customer = await customerService.GetByIdAsync(id);
+        return customer is null ? NotFound() : View(customer);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, CustomerDto dto)
+    {
+        if (!ModelState.IsValid) return View(dto);
+
         var updated = await customerService.UpdateAsync(id, dto);
-        return updated ? NoContent() : NotFound();
+        return updated ? RedirectToAction(nameof(Index)) : NotFound();
     }
 
-    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await customerService.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound();
+        var customer = await customerService.GetByIdAsync(id);
+        return customer is null ? NotFound() : View(customer);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        await customerService.DeleteAsync(id);
+        return RedirectToAction(nameof(Index));
     }
 }
