@@ -72,6 +72,8 @@
             }
 
             function addRow(existing) {
+                console.log(existing);
+
                 var i = rowIndex++;
                 var selectId = 'productSelect_' + i;
                 var qty = existing ? existing.OrderQty : 1;
