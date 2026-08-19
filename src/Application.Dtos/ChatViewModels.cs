@@ -1,6 +1,24 @@
-using Domain.Entities;
-
 namespace Application.Dtos;
+
+/// <summary>A chat session: id, title, and (when loaded) its messages.</summary>
+[Serializable]
+public class ChatSessionDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = "New chat";
+    public DateTime CreatedAt { get; set; }
+    public List<ChatMessageDto> Messages { get; set; } = new();
+}
+
+/// <summary>A single message within a <see cref="ChatSessionDto"/>.</summary>
+[Serializable]
+public class ChatMessageDto
+{
+    public int Id { get; set; }
+    public string Role { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}
 
 /// <summary>
 /// View model for the main chat page: the list of sessions for the sidebar
@@ -9,16 +27,16 @@ namespace Application.Dtos;
 public class ChatPageViewModel
 {
     /// <summary>All chat sessions, newest first, shown in the sidebar.</summary>
-    public List<ChatSession> Sessions { get; set; } = new();
+    public List<ChatSessionDto> Sessions { get; set; } = new();
 
     /// <summary>The session currently open in the main pane, with messages loaded, or null if none selected.</summary>
-    public ChatSession? ActiveSession { get; set; }
+    public ChatSessionDto? ActiveSession { get; set; }
 }
 
 /// <summary>Request body for <c>POST /Chat/Send</c>: a user message to send within a session.</summary>
 public class SendMessageRequest
 {
-    /// <summary>Id of the target <see cref="ChatSession"/>.</summary>
+    /// <summary>Id of the target <see cref="ChatSessionDto"/>.</summary>
     public int SessionId { get; set; }
 
     /// <summary>The user's message text.</summary>

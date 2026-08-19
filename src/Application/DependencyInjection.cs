@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddScoped<IChatService, OllamaChatService>();
         services.AddScoped<IDocumentIngestionService, DocumentIngestionService>();
         services.AddScoped<IRetrievalService, RetrievalService>();
+        services.AddScoped<IChatSessionService, ChatSessionService>();
 
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile).Assembly));
 

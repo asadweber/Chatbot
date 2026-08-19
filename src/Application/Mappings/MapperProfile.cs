@@ -22,5 +22,8 @@ public class MapperProfile : Profile
         CreateMap<Document, DocumentDto>()
             .ForMember(d => d.ChunkCount, o => o.MapFrom(s => s.Chunks.Count));
 
+        CreateMap<ChatSession, ChatSessionDto>();
+        CreateMap<ChatMessage, ChatMessageDto>();
+
     }
 }

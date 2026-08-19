@@ -1,9 +1,6 @@
 using Application.Dtos;
 using Application.Interfaces;
-using Domain.Entities;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chatbot.Controllers;
 
@@ -11,19 +8,16 @@ namespace Chatbot.Controllers;
 /// Drives the chat UI and conversation lifecycle: listing/creating/renaming/
 /// deleting sessions, and handling message sends — which combine retrieval
 /// (RAG context lookup) with LLM chat completion and persist both sides of
-/// the exchange.
+/// the exchange. All persistence/orchestration is delegated to
+/// <see cref="IChatSessionService"/>.
 /// </summary>
 public class ChatController : Controller
 {
-    private readonly VectorDbContext _db;
-    private readonly IRetrievalService _retrieval;
-    private readonly IChatService _chat;
+    private readonly IChatSessionService _chatSessions;
 
-    public ChatController(VectorDbContext db, IRetrievalService retrieval, IChatService chat)
+    public ChatController(IChatSessionService chatSessions)
     {
-        _db = db;
-        _retrieval = retrieval;
-        _chat = chat;
+        _chatSessions = chatSessions;
     }
 
     /// <summary>
@@ -31,28 +25,22 @@ public class ChatController : Controller
     /// <paramref name="sessionId"/> is given, loads that session with its
     /// messages for display in the main pane.
     /// </summary>
-    public async Task<IActionResult> Index(int? sessionId)
+    public async Task<IActionResult> Index(int? sessionId, CancellationToken ct)
     {
-        var sessions = await _db.ChatSessions.OrderByDescending(s => s.CreatedAt).ToListAsync();
+        var sessions = await _chatSessions.GetSessionsAsync(ct);
 
-        ChatSession? active = null;
-        if (sessionId.HasValue)
-        {
-            active = await _db.ChatSessions
-                .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
-                .FirstOrDefaultAsync(s => s.Id == sessionId.Value);
-        }
+        var active = sessionId.HasValue
+            ? await _chatSessions.GetSessionWithMessagesAsync(sessionId.Value, ct)
+            : null;
 
-        return View(new ChatPageViewModel { Sessions = sessions, ActiveSession = active });
+        return View(new ChatPageViewModel { Sessions = sessions.ToList(), ActiveSession = active });
     }
 
     /// <summary>Creates an empty chat session and redirects to it.</summary>
     [HttpPost]
-    public async Task<IActionResult> NewSession()
+    public async Task<IActionResult> NewSession(CancellationToken ct)
     {
-        var session = new ChatSession();
-        _db.ChatSessions.Add(session);
-        await _db.SaveChangesAsync();
+        var session = await _chatSessions.CreateSessionAsync(ct);
         return RedirectToAction(nameof(Index), new { sessionId = session.Id });
     }
 
@@ -63,30 +51,23 @@ public class ChatController : Controller
     [HttpPost]
     public async Task<IActionResult> RenameSession([FromBody] RenameSessionRequest request, CancellationToken ct)
     {
-        var title = request.Title.Trim();
-        if (string.IsNullOrWhiteSpace(title))
+        if (string.IsNullOrWhiteSpace(request.Title))
             return BadRequest("Title cannot be empty.");
 
-        var session = await _db.ChatSessions.FirstOrDefaultAsync(s => s.Id == request.SessionId, ct);
-        if (session is null)
+        var title = await _chatSessions.RenameSessionAsync(request.SessionId, request.Title, ct);
+        if (title is null)
             return NotFound("Chat session not found.");
 
-        session.Title = title.Length > 60 ? title[..60] : title;
-        await _db.SaveChangesAsync(ct);
-
-        return Json(new { title = session.Title });
+        return Json(new { title });
     }
 
     /// <summary>Deletes a session and (via cascade delete) its messages.</summary>
     [HttpPost]
     public async Task<IActionResult> DeleteSession([FromBody] DeleteSessionRequest request, CancellationToken ct)
     {
-        var session = await _db.ChatSessions.FirstOrDefaultAsync(s => s.Id == request.SessionId, ct);
-        if (session is null)
+        var deleted = await _chatSessions.DeleteSessionAsync(request.SessionId, ct);
+        if (!deleted)
             return NotFound("Chat session not found.");
-
-        _db.ChatSessions.Remove(session);
-        await _db.SaveChangesAsync(ct);
 
         return Json(new { deleted = true });
     }
@@ -103,38 +84,9 @@ public class ChatController : Controller
         if (string.IsNullOrWhiteSpace(request.Message))
             return BadRequest("Message cannot be empty.");
 
-        var session = await _db.ChatSessions
-            .Include(s => s.Messages.OrderBy(m => m.CreatedAt))
-            .FirstOrDefaultAsync(s => s.Id == request.SessionId, ct);
-
-        if (session is null)
+        var reply = await _chatSessions.SendMessageAsync(request.SessionId, request.Message, ct);
+        if (reply is null)
             return NotFound("Chat session not found.");
-
-        var userMessage = new ChatMessage { SessionId = session.Id, Role = "user", Content = request.Message };
-        _db.ChatMessages.Add(userMessage);
-
-        // First message in the session: derive a display title from it so
-        // the sidebar shows something more useful than "New chat".
-        if (session.Messages.Count == 0)
-            session.Title = request.Message.Length > 60 ? request.Message[..60] + "..." : request.Message;
-
-        await _db.SaveChangesAsync(ct);
-
-        // Conversation so far — session.Messages is a tracked, loaded
-        // collection so it already includes the user message just added
-        // above. Passed to the chat service for full conversational context.
-        var history = session.Messages.Select(m => (m.Role, m.Content)).ToList();
-
-
-        // Retrieval-augmented generation: look up document chunks relevant
-        // to the user's message to ground the assistant's answer.
-        var contextChunks = await _retrieval.RetrieveRelevantChunksAsync(request.Message, ct: ct);
-
-
-        var reply = await _chat.GetResponseAsync(request.Message, history, contextChunks, ct);
-
-        _db.ChatMessages.Add(new ChatMessage { SessionId = session.Id, Role = "assistant", Content = reply });
-        await _db.SaveChangesAsync(ct);
 
         return Json(new SendMessageResponse { Reply = reply });
     }
