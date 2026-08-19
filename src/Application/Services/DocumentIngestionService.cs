@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 using UglyToad.PdfPig;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 /// <summary>
 /// <see cref="IDocumentIngestionService"/> implementation: extracts text from

@@ -2,7 +2,7 @@ using Application.Interfaces;
 using Microsoft.SemanticKernel.Embeddings;
 using Pgvector;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 /// <summary>
 /// <see cref="IEmbeddingService"/> implementation backed by a Semantic Kernel
@@ -10,11 +10,11 @@ namespace Infrastructure.Services;
 /// embedding model. Converts the generated float vector into a pgvector
 /// <see cref="Vector"/> for storage/querying via Npgsql.
 /// </summary>
-public class OllamaEmbeddingService : IEmbeddingService
+public class EmbeddingService : IEmbeddingService
 {
     private readonly ITextEmbeddingGenerationService _generator;
 
-    public OllamaEmbeddingService(ITextEmbeddingGenerationService generator)
+    public EmbeddingService(ITextEmbeddingGenerationService generator)
     {
         _generator = generator;
     }

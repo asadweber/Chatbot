@@ -13,6 +13,16 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICustomerService, CustomerService>();
 
+        // Chatbot / RAG services. Their DbContext + Semantic Kernel dependencies
+        // are registered by Infrastructure.AddInfrastructure (called before this
+        // in the composition root); the implementations live here rather than in
+        // Infrastructure to avoid Infrastructure needing a ProjectReference back
+        // to Application.
+        services.AddScoped<IEmbeddingService, EmbeddingService>();
+        services.AddScoped<IChatService, OllamaChatService>();
+        services.AddScoped<IDocumentIngestionService, DocumentIngestionService>();
+        services.AddScoped<IRetrievalService, RetrievalService>();
+
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile).Assembly));
 
         return services;

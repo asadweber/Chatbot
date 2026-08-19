@@ -1,7 +1,7 @@
 using Application.Interfaces;
 using Microsoft.SemanticKernel.ChatCompletion;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 /// <summary>
 /// <see cref="IChatService"/> implementation backed by a Semantic Kernel

@@ -3,7 +3,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 /// <summary>
 /// <see cref="IRetrievalService"/> implementation that embeds the query and
