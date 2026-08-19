@@ -1,3 +1,5 @@
+using Application.Dtos;
+
 namespace Application.Interfaces;
 
 /// <summary>
@@ -14,6 +16,6 @@ public interface IDocumentIngestionService
     /// <param name="fileName">Original file name (used to detect format, e.g. ".pdf").</param>
     /// <param name="content">The file's raw byte stream.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The id of the newly created <c>Document</c> record.</returns>
-    Task<int> IngestionAsync(string fileName, Stream content, CancellationToken ct = default);
+    /// <returns>The newly created document, as a <see cref="DocumentDto"/>.</returns>
+    Task<DocumentDto> IngestionAsync(string fileName, Stream content, CancellationToken ct = default);
 }

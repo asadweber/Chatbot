@@ -19,5 +19,8 @@ public class MapperProfile : Profile
             .ForMember(d => d.OrderDate, o => o.Ignore())
             .ForMember(d => d.TotalAmount, o => o.Ignore());
 
+        CreateMap<Document, DocumentDto>()
+            .ForMember(d => d.ChunkCount, o => o.MapFrom(s => s.Chunks.Count));
+
     }
 }

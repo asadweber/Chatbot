@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Repositories;
@@ -35,7 +36,7 @@ public class DocumentIngestionService : IDocumentIngestionService
     }
 
     /// <inheritdoc />
-    public async Task<int> IngestionAsync(string fileName, Stream content, CancellationToken ct = default)
+    public async Task<DocumentDto> IngestionAsync(string fileName, Stream content, CancellationToken ct = default)
     {
         var text = ExtractText(fileName, content);
         var chunkTexts = ChunkRecursive(text);
@@ -51,7 +52,14 @@ public class DocumentIngestionService : IDocumentIngestionService
         await _documents.AddDocumentWithChunksAsync(document, chunks, ct);
 
         _logger.LogInformation("Ingested {FileName} as document {DocumentId} with {ChunkCount} chunks", fileName, document.Id, chunks.Count);
-        return document.Id;
+
+        return new DocumentDto
+        {
+            Id = document.Id,
+            FileName = document.FileName,
+            UploadedAt = document.UploadedAt,
+            ChunkCount = chunks.Count
+        };
     }
 
     /// <summary>

@@ -1,4 +1,6 @@
+using Application.Dtos;
 using Application.Interfaces;
+using AutoMapper;
 using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,18 +18,20 @@ public class DocumentsController : Controller
 
     private readonly IDocumentRepository _documents;
     private readonly IDocumentIngestionService _ingestion;
+    private readonly IMapper _mapper;
 
-    public DocumentsController(IDocumentRepository documents, IDocumentIngestionService ingestion)
+    public DocumentsController(IDocumentRepository documents, IDocumentIngestionService ingestion, IMapper mapper)
     {
         _documents = documents;
         _ingestion = ingestion;
+        _mapper = mapper;
     }
 
     /// <summary>Lists all ingested documents (with their chunks loaded), newest first.</summary>
     public async Task<IActionResult> Index()
     {
         var documents = await _documents.GetAllWithChunksAsync();
-        return View(documents.ToList());
+        return View(_mapper.Map<List<DocumentDto>>(documents));
     }
 
     /// <summary>

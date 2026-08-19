@@ -1,4 +1,4 @@
-@model List<Domain.Entities.Document>
+@model List<Application.Dtos.DocumentDto>
 @{
     ViewData["Title"] = "Documents";
 }
@@ -33,7 +33,7 @@
             <tr>
                 <td>@document.FileName</td>
                 <td>@document.UploadedAt.ToString("u")</td>
-                <td>@document.Chunks.Count</td>
+                <td>@document.ChunkCount</td>
             </tr>
         }
     </tbody>
