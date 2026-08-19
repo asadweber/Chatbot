@@ -1,23 +1,20 @@
 using Application.Interfaces;
-using Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Pgvector.EntityFrameworkCore;
+using Domain.Repositories;
 
 namespace Application.Services;
 
 /// <summary>
 /// <see cref="IRetrievalService"/> implementation that embeds the query and
-/// performs a pgvector cosine-distance nearest-neighbor search over stored
-/// <c>DocumentChunk</c> embeddings via EF Core + Npgsql.
+/// delegates the nearest-neighbor chunk search to <see cref="IDocumentRepository"/>.
 /// </summary>
 public class RetrievalService : IRetrievalService
 {
-    private readonly VectorDbContext _db;
+    private readonly IDocumentRepository _documents;
     private readonly IEmbeddingService _embeddings;
 
-    public RetrievalService(VectorDbContext db, IEmbeddingService embeddings)
+    public RetrievalService(IDocumentRepository documents, IEmbeddingService embeddings)
     {
-        _db = db;
+        _documents = documents;
         _embeddings = embeddings;
     }
 
@@ -25,14 +22,6 @@ public class RetrievalService : IRetrievalService
     public async Task<IReadOnlyList<string>> RetrieveRelevantChunksAsync(string query, int topK = 4, CancellationToken ct = default)
     {
         var queryEmbedding = await _embeddings.EmbedAsync(query, ct);
-
-        // CosineDistance is translated by Pgvector.EntityFrameworkCore into a
-        // pgvector "<=>" SQL operator, letting Postgres do the nearest-
-        // neighbor ranking (and use an index) instead of pulling all rows.
-        return await _db.DocumentChunks
-            .OrderBy(c => c.Embedding!.CosineDistance(queryEmbedding))
-            .Take(topK)
-            .Select(c => c.Content)
-            .ToListAsync(ct);
+        return await _documents.SearchSimilarChunksAsync(queryEmbedding, topK, ct);
     }
 }

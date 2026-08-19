@@ -1,7 +1,6 @@
 using Application.Interfaces;
-using Infrastructure.Persistence;
+using Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chatbot.Controllers;
 
@@ -15,24 +14,20 @@ public class DocumentsController : Controller
     /// <summary>File extensions accepted for upload/ingestion.</summary>
     private static readonly string[] AllowedExtensions = { ".pdf", ".txt", ".md" };
 
-    private readonly VectorDbContext _db;
+    private readonly IDocumentRepository _documents;
     private readonly IDocumentIngestionService _ingestion;
 
-    public DocumentsController(VectorDbContext db, IDocumentIngestionService ingestion)
+    public DocumentsController(IDocumentRepository documents, IDocumentIngestionService ingestion)
     {
-        _db = db;
+        _documents = documents;
         _ingestion = ingestion;
     }
 
     /// <summary>Lists all ingested documents (with their chunks loaded), newest first.</summary>
     public async Task<IActionResult> Index()
     {
-        var documents = await _db.Documents
-            .Include(d => d.Chunks)
-            .OrderByDescending(d => d.UploadedAt)
-            .ToListAsync();
-
-        return View(documents);
+        var documents = await _documents.GetAllWithChunksAsync();
+        return View(documents.ToList());
     }
 
     /// <summary>

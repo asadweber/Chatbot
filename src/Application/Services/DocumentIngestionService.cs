@@ -1,6 +1,6 @@
 using Application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Persistence;
+using Domain.Repositories;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using UglyToad.PdfPig;
@@ -12,7 +12,7 @@ namespace Application.Services;
 /// uploaded files (PDF via PdfPig, plain text otherwise), splits it into
 /// overlapping chunks using a recursive separator-based strategy, embeds each
 /// chunk, and persists the <see cref="Document"/>/<see cref="DocumentChunk"/>
-/// graph via EF Core.
+/// graph via <see cref="IDocumentRepository"/>.
 /// </summary>
 public class DocumentIngestionService : IDocumentIngestionService
 {
@@ -23,13 +23,13 @@ public class DocumentIngestionService : IDocumentIngestionService
     private const int ChunkSize = 1000;
     private const int ChunkOverlap = 200;
 
-    private readonly VectorDbContext _db;
+    private readonly IDocumentRepository _documents;
     private readonly IEmbeddingService _embeddings;
     private readonly ILogger<DocumentIngestionService> _logger;
 
-    public DocumentIngestionService(VectorDbContext db, IEmbeddingService embeddings, ILogger<DocumentIngestionService> logger)
+    public DocumentIngestionService(IDocumentRepository documents, IEmbeddingService embeddings, ILogger<DocumentIngestionService> logger)
     {
-        _db = db;
+        _documents = documents;
         _embeddings = embeddings;
         _logger = logger;
     }
@@ -38,26 +38,18 @@ public class DocumentIngestionService : IDocumentIngestionService
     public async Task<int> IngestionAsync(string fileName, Stream content, CancellationToken ct = default)
     {
         var text = ExtractText(fileName, content);
-        var chunks = ChunkRecursive(text);
+        var chunkTexts = ChunkRecursive(text);
 
-        // Persist the Document first so its DB-generated Id is available
-        // when constructing the chunk rows below.
         var document = new Document { FileName = fileName };
-        _db.Documents.Add(document);
-        await _db.SaveChangesAsync(ct);
-
-        foreach (var chunkText in chunks)
+        var chunks = new List<DocumentChunk>(chunkTexts.Count);
+        foreach (var chunkText in chunkTexts)
         {
             var embedding = await _embeddings.EmbedAsync(chunkText, ct);
-            _db.DocumentChunks.Add(new DocumentChunk
-            {
-                DocumentId = document.Id,
-                Content = chunkText,
-                Embedding = embedding
-            });
+            chunks.Add(new DocumentChunk { Content = chunkText, Embedding = embedding });
         }
 
-        await _db.SaveChangesAsync(ct);
+        await _documents.AddDocumentWithChunksAsync(document, chunks, ct);
+
         _logger.LogInformation("Ingested {FileName} as document {DocumentId} with {ChunkCount} chunks", fileName, document.Id, chunks.Count);
         return document.Id;
     }
