@@ -1,2 +1,3 @@
-dotnet ef migrations add Init --project src/Infrastructure --startup-project src/Chatbot
-dotnet ef database update --project src/Infrastructure --startup-project src/Chatbot
+dotnet ef migrations add Init --project src/Infrastructure --startup-project src/Chatbot --context AppDbContext
+
+dotnet ef database update --project src/Infrastructure --startup-project src/Chatbot --context AppDbContext
