@@ -97,6 +97,33 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Customers",
+                columns: new[] { "Id", "City", "CreatedAt", "Industry", "Name", "State" },
+                values: new object[,]
+                {
+                    { 1, "Chicago", new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc), "Manufacturing", "Acme Corp", "IL" },
+                    { 2, "Austin", new DateTime(2026, 1, 6, 0, 0, 0, 0, DateTimeKind.Utc), "Technology", "Globex Inc", "TX" },
+                    { 3, "Houston", new DateTime(2026, 1, 7, 0, 0, 0, 0, DateTimeKind.Utc), "Software", "Initech", "TX" },
+                    { 4, "Raleigh", new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Utc), "Pharmaceuticals", "Umbrella LLC", "NC" },
+                    { 5, "Denver", new DateTime(2026, 1, 9, 0, 0, 0, 0, DateTimeKind.Utc), "Food & Beverage", "Soylent Corp", "CO" },
+                    { 6, "San Jose", new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Technology", "Hooli", "CA" },
+                    { 7, "New York", new DateTime(2026, 1, 11, 0, 0, 0, 0, DateTimeKind.Utc), "Defense", "Stark Industries", "NY" },
+                    { 8, "Gotham", new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc), "Conglomerate", "Wayne Enterprises", "NJ" },
+                    { 9, "Portland", new DateTime(2026, 1, 13, 0, 0, 0, 0, DateTimeKind.Utc), "Food & Beverage", "Wonka Industries", "OR" },
+                    { 10, "Los Angeles", new DateTime(2026, 1, 14, 0, 0, 0, 0, DateTimeKind.Utc), "Robotics", "Cyberdyne Systems", "CA" },
+                    { 11, "Boston", new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc), "Biotech", "Massive Dynamic", "MA" },
+                    { 12, "Seattle", new DateTime(2026, 1, 16, 0, 0, 0, 0, DateTimeKind.Utc), "Research", "Aperture Science", "WA" },
+                    { 13, "New York", new DateTime(2026, 1, 17, 0, 0, 0, 0, DateTimeKind.Utc), "Chemicals", "Oscorp", "NY" },
+                    { 14, "Los Angeles", new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc), "Biotechnology", "Tyrell Corp", "CA" },
+                    { 15, "Phoenix", new DateTime(2026, 1, 19, 0, 0, 0, 0, DateTimeKind.Utc), "Aerospace", "Weyland-Yutani", "AZ" },
+                    { 16, "Charlotte", new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc), "Finance", "Gringotts Ltd", "NC" },
+                    { 17, "Miami", new DateTime(2026, 1, 21, 0, 0, 0, 0, DateTimeKind.Utc), "Media", "Prestige Worldwide", "FL" },
+                    { 18, "New York", new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Utc), "Import/Export", "Vandelay Industries", "NY" },
+                    { 19, "Springfield", new DateTime(2026, 1, 23, 0, 0, 0, 0, DateTimeKind.Utc), "Food & Beverage", "Duff Brewing", "OH" },
+                    { 20, "Atlanta", new DateTime(2026, 1, 24, 0, 0, 0, 0, DateTimeKind.Utc), "Consulting", "Monarch Solutions", "GA" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Products",
                 columns: new[] { "Id", "Name", "Price", "Stock" },
                 values: new object[,]
