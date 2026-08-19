@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chatbot.Controllers;
 
-public class OrdersController(IOrderService orderService, IProductService productService) : Controller
+public class OrdersController(IOrderService orderService) : Controller
 {
     public IActionResult Index()
     {
@@ -36,9 +36,8 @@ public class OrdersController(IOrderService orderService, IProductService produc
         return order is null ? NotFound() : View(order);
     }
 
-    public async Task<IActionResult> Create()
+    public IActionResult Create()
     {
-        ViewBag.Products = await productService.GetAllAsync();
         return View(new OrderDto { OrderDate = DateTime.UtcNow });
     }
 

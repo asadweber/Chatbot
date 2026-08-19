@@ -1,9 +1,39 @@
 @model Chatbot.Models.ProductSelectViewModel
 
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+<link rel="stylesheet" href="~/lib/select2/css/select2-bootstrap.min.css" />
+
 <select name="@Model.FieldName" id="@Model.ElementId" class="form-control product-select">
-    <option value="">-- select --</option>
-    @foreach (var p in Model.Products)
+    @if (Model.SelectedId is not null)
     {
-        <option value="@p.Id" data-price="@p.Price" selected="@(p.Id == Model.SelectedId)">@p.Name</option>
+        <option value="@Model.SelectedId" selected>@Model.SelectedText</option>
     }
 </select>
+
+<script>
+    window.addEventListener('load', function () {
+        $('#@Model.ElementId').select2({
+            theme: 'bootstrap',
+            placeholder: 'Select a product',
+            ajax: {
+                url: '@Url.Action("Search", "Products")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term, page: params.page || 1 };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return { results: data.results, pagination: data.pagination };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
+
+        $('#@Model.ElementId').on('select2:select', function (e) {
+            var price = e.params.data.price || 0;
+            $(this).closest('tr').find('.price-input').val(price).trigger('input');
+        });
+    });
+</script>

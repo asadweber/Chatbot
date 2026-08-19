@@ -9,4 +9,6 @@ public interface IProductService
     Task<bool> ReduceStockQtyAsync(long productId, long qty);
 
     Task<List<ProductDto>> GetAllAsync();
+
+    Task<DataTableResponseDto<ProductDto>> GetPagedAsync(DataTableRequestDto request);
 }

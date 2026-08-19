@@ -8,4 +8,6 @@ public interface IProductRepository : IGenericRepository<Product>
 
     Task<bool> ReduceStockQtyAsync(int productId, int qty);
 
+    Task<(IReadOnlyList<Product> Items, int TotalCount, int FilteredCount)> GetPagedAsync(
+        int skip, int take, string? searchTerm);
 }

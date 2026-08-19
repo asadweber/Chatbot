@@ -1,22 +1,19 @@
-using Application.Interfaces;
 using Chatbot.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chatbot.ViewComponents;
 
-public class ProductSelectViewComponent(IProductService productService) : ViewComponent
+public class ProductSelectViewComponent : ViewComponent
 {
-    public async Task<IViewComponentResult> InvokeAsync(long? selectedId = null,
+    public IViewComponentResult Invoke(long? selectedId = null, string? selectedText = null,
         string fieldName = "ProductId", string elementId = "productSelect")
     {
-        var products = await productService.GetAllAsync();
-
         var model = new ProductSelectViewModel
         {
             FieldName = fieldName,
             ElementId = elementId,
             SelectedId = selectedId,
-            Products = products
+            SelectedText = selectedText
         };
 
         return View(model);

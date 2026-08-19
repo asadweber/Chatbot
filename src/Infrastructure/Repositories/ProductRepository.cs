@@ -23,4 +23,21 @@ public class ProductRepository(AppDbContext context)
         await Context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<(IReadOnlyList<Product> Items, int TotalCount, int FilteredCount)> GetPagedAsync(
+        int skip, int take, string? searchTerm)
+    {
+        var query = Set.AsNoTracking();
+
+        var totalCount = await query.CountAsync();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(p => p.Name.Contains(searchTerm));
+
+        var filteredCount = await query.CountAsync();
+
+        var items = await query.OrderBy(p => p.Name).Skip(skip).Take(take).ToListAsync();
+
+        return (items, totalCount, filteredCount);
+    }
 }

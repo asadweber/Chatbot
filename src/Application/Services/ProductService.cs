@@ -34,4 +34,18 @@ public class ProductService(IUnitOfWork uow, IMapper mapper) : IProductService
         var products = await uow.Products.GetAllAsync();
         return mapper.Map<List<ProductDto>>(products);
     }
+
+    public async Task<DataTableResponseDto<ProductDto>> GetPagedAsync(DataTableRequestDto request)
+    {
+        var (items, totalCount, filteredCount) = await uow.Products.GetPagedAsync(
+            request.Start, request.Length, request.SearchValue);
+
+        return new DataTableResponseDto<ProductDto>
+        {
+            Draw = request.Draw,
+            RecordsTotal = totalCount,
+            RecordsFiltered = filteredCount,
+            Data = mapper.Map<List<ProductDto>>(items)
+        };
+    }
 }
