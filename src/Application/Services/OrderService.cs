@@ -3,13 +3,10 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain;
 using Domain.Entities;
-using MassTransit;
-using Microsoft.EntityFrameworkCore;
-using static MassTransit.ValidationResultExtensions;
 
 namespace Application.Services;
 
-public class OrderService(IUnitOfWork uow, IPublishEndpoint bus, IMapper mapper) : IOrderService
+public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
 {
     public async Task<List<OrderDto>> GetAllAsync()
     {
