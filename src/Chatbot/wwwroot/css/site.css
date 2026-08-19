@@ -52,21 +52,41 @@ body {
     color: #7a5c00;
 }
 
-.orders-card thead,
-.card thead,
-table thead {
+.orders-card table thead th,
+.card table thead th,
+#ordersTable thead th,
+#orderDetailsTable thead th {
     background: linear-gradient(90deg, #4a3800 0%, #b8860b 100%);
-}
-
-.orders-card thead th,
-.card thead th {
-    color: #fff;
-    border: none;
+    color: #fff !important;
+    border: none !important;
     padding: 0.9rem 1rem;
+    vertical-align: middle;
 }
 
-#ordersTable td {
+#ordersTable tbody td {
     padding: 0.85rem 1rem;
+    vertical-align: middle;
+}
+
+#ordersTable tbody tr:hover {
+    background-color: #fff8e6;
+}
+
+#ordersTable .btn-sm {
+    font-weight: 500;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    padding: 0.75rem 1rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(90deg, #4a3800 0%, #b8860b 100%) !important;
+    border-color: #b8860b !important;
+    color: #fff !important;
 }
 
 .accent-card {
