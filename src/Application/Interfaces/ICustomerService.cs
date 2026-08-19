@@ -9,4 +9,5 @@ public interface ICustomerService
     Task<CustomerDto> CreateAsync(CustomerDto dto);
     Task<bool> UpdateAsync(int id, CustomerDto dto);
     Task<bool> DeleteAsync(int id);
+    Task<DataTableResponseDto<CustomerDto>> GetPagedAsync(DataTableRequestDto request);
 }

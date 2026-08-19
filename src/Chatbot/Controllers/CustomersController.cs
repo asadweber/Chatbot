@@ -6,10 +6,28 @@ namespace Chatbot.Controllers;
 
 public class CustomersController(ICustomerService customerService) : Controller
 {
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        var customers = await customerService.GetAllAsync();
-        return View(customers);
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> IndexData()
+    {
+        var form = Request.Form;
+
+        var request = new DataTableRequestDto
+        {
+            Draw = int.TryParse(form["draw"], out var draw) ? draw : 0,
+            Start = int.TryParse(form["start"], out var start) ? start : 0,
+            Length = int.TryParse(form["length"], out var length) && length > 0 ? length : 10,
+            SearchValue = form["search[value]"],
+            SortColumn = form[$"columns[{form["order[0][column]"]}][data]"],
+            SortDirection = form["order[0][dir]"]
+        };
+
+        var result = await customerService.GetPagedAsync(request);
+        return Json(result);
     }
 
     public async Task<IActionResult> Details(int id)

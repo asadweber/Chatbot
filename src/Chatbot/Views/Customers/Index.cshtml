@@ -1,4 +1,3 @@
-@model List<Application.Dtos.CustomerDto>
 @{
     ViewData["Title"] = "Customers";
 }
@@ -9,7 +8,9 @@
     <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
 
-<table class="table">
+<link rel="stylesheet" href="~/lib/datatables/dataTables.bootstrap5.min.css" />
+
+<table id="customersTable" class="table table-striped" style="width:100%">
     <thead>
         <tr>
             <th>Name</th>
@@ -17,24 +18,46 @@
             <th>City</th>
             <th>State</th>
             <th>Created At</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
-    <tbody>
-        @foreach (var customer in Model)
-        {
-            <tr>
-                <td>@customer.Name</td>
-                <td>@customer.Industry</td>
-                <td>@customer.City</td>
-                <td>@customer.State</td>
-                <td>@customer.CreatedAt.ToString("u")</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-secondary">Details</a>
-                    <a asp-action="Edit" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(function () {
+            $('#customersTable').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '@Url.Action("IndexData", "Customers")',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'industry' },
+                    { data: 'city' },
+                    { data: 'state' },
+                    {
+                        data: 'createdAt',
+                        render: function (data) {
+                            return data ? new Date(data).toISOString().replace('T', ' ').substring(0, 19) : '';
+                        }
+                    },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (id) {
+                            return '<a href="/Customers/Details/' + id + '" class="btn btn-sm btn-outline-secondary">Details</a> ' +
+                                   '<a href="/Customers/Edit/' + id + '" class="btn btn-sm btn-outline-primary">Edit</a> ' +
+                                   '<a href="/Customers/Delete/' + id + '" class="btn btn-sm btn-outline-danger">Delete</a>';
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}
