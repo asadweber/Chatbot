@@ -9,7 +9,7 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group mb-2">
         <label asp-for="CustomerId" class="control-label"></label>
-        <input asp-for="CustomerId" class="form-control" />
+        @await Component.InvokeAsync("CustomerSelect")
         <span asp-validation-for="CustomerId" class="text-danger"></span>
     </div>
     <div class="form-group mb-2">
@@ -19,3 +19,7 @@
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </form>
+
+@section Scripts {
+    <script src="~/lib/select2/js/select2.full.min.js"></script>
+}

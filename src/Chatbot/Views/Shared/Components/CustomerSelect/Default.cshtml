@@ -1,0 +1,34 @@
+@model Chatbot.Models.CustomerSelectViewModel
+
+<link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+<link rel="stylesheet" href="~/lib/select2/css/select2-bootstrap.min.css" />
+
+<select name="@Model.FieldName" id="@Model.ElementId" class="form-control">
+    @if (Model.SelectedId is not null)
+    {
+        <option value="@Model.SelectedId" selected>@Model.SelectedText</option>
+    }
+</select>
+
+<script>
+    $(function () {
+        $('#@Model.ElementId').select2({
+            theme: 'bootstrap',
+            placeholder: 'Select a customer',
+            ajax: {
+                url: '@Url.Action("Search", "Customers")',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { q: params.term, page: params.page || 1 };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return { results: data.results, pagination: data.pagination };
+                },
+                cache: true
+            },
+            minimumInputLength: 0
+        });
+    });
+</script>

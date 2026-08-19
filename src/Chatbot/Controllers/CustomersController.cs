@@ -11,6 +11,29 @@ public class CustomersController(ICustomerService customerService) : Controller
         return View();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Search(string? q, int page = 1)
+    {
+        const int pageSize = 10;
+
+        var request = new DataTableRequestDto
+        {
+            Start = (page - 1) * pageSize,
+            Length = pageSize,
+            SearchValue = q,
+            SortColumn = "Name",
+            SortDirection = "asc"
+        };
+
+        var result = await customerService.GetPagedAsync(request);
+
+        return Json(new
+        {
+            results = result.Data.Select(c => new { id = c.Id, text = c.Name }),
+            pagination = new { more = result.RecordsFiltered > page * pageSize }
+        });
+    }
+
     [HttpPost]
     public async Task<IActionResult> IndexData()
     {
