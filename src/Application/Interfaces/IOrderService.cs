@@ -9,4 +9,5 @@ public interface IOrderService
     Task<OrderDto> CreateAsync(OrderDto request);
     Task<bool> UpdateAsync(long id, OrderDto request);
     Task<bool> DeleteAsync(long id);
+    Task<DataTableResponseDto<OrderDto>> GetPagedAsync(DataTableRequestDto request);
 }

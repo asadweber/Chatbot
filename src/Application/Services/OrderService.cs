@@ -72,4 +72,20 @@ public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
         await uow.SaveChangesAsync();
         return true;
     }
+
+    public async Task<DataTableResponseDto<OrderDto>> GetPagedAsync(DataTableRequestDto request)
+    {
+        var sortAscending = !string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+
+        var (items, totalCount, filteredCount) = await uow.Orders.GetPagedAsync(
+            request.Start, request.Length, request.SearchValue, request.SortColumn, sortAscending);
+
+        return new DataTableResponseDto<OrderDto>
+        {
+            Draw = request.Draw,
+            RecordsTotal = totalCount,
+            RecordsFiltered = filteredCount,
+            Data = mapper.Map<List<OrderDto>>(items)
+        };
+    }
 }

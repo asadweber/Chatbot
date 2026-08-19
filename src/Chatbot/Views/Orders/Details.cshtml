@@ -1,0 +1,46 @@
+@model Application.Dtos.OrderDto
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h1>Order Details</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Customer Id</dt>
+    <dd class="col-sm-10">@Model.CustomerId</dd>
+
+    <dt class="col-sm-2">Order Date</dt>
+    <dd class="col-sm-10">@Model.OrderDate.ToString("u")</dd>
+
+    <dt class="col-sm-2">Total Amount</dt>
+    <dd class="col-sm-10">@Model.TotalAmount.ToString("C")</dd>
+
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@Model.Status</dd>
+</dl>
+
+<h3>Order Details</h3>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Product Id</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <tr>
+                <td>@detail.ProductId</td>
+                <td>@detail.OrderQty</td>
+                <td>@detail.UnitPrice.ToString("C")</td>
+                <td>@detail.Total.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

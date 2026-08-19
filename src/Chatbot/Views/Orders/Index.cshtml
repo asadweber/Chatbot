@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<h1>Orders</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<link rel="stylesheet" href="~/lib/datatables/dataTables.bootstrap5.min.css" />
+
+<table id="ordersTable" class="table table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Order Date</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts {
+    <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(function () {
+            $('#ordersTable').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '@Url.Action("IndexData", "Orders")',
+                    type: 'POST'
+                },
+                columns: [
+                    { data: 'customerId', name: 'CustomerName' },
+                    {
+                        data: 'orderDate',
+                        name: 'OrderDate',
+                        render: function (data) {
+                            return data ? new Date(data).toISOString().replace('T', ' ').substring(0, 19) : '';
+                        }
+                    },
+                    { data: 'totalAmount', name: 'TotalAmount' },
+                    { data: 'status', name: 'Status' },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (id) {
+                            return '<a href="/Orders/Details/' + id + '" class="btn btn-sm btn-outline-secondary">Details</a> ' +
+                                   '<a href="/Orders/Edit/' + id + '" class="btn btn-sm btn-outline-primary">Edit</a> ' +
+                                   '<a href="/Orders/Delete/' + id + '" class="btn btn-sm btn-outline-danger">Delete</a>';
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}
