@@ -1,11 +1,12 @@
 @model Application.Dtos.OrderDto
 @{
     ViewData["Title"] = "Create Order";
+    var products = (List<Application.Dtos.ProductDto>)ViewBag.Products;
 }
 
 <h1>Create Order</h1>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" id="orderForm">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group mb-2">
         <label asp-for="CustomerId" class="control-label"></label>
@@ -13,13 +14,104 @@
         <span asp-validation-for="CustomerId" class="text-danger"></span>
     </div>
     <div class="form-group mb-2">
+        <label asp-for="OrderDate" class="control-label"></label>
+        <input asp-for="OrderDate" type="datetime-local" class="form-control" />
+        <span asp-validation-for="OrderDate" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-2">
         <label asp-for="Status" class="control-label"></label>
         <input asp-for="Status" class="form-control" />
     </div>
+
+    <h3 class="mt-4">Order Details</h3>
+    <table class="table table-sm" id="orderDetailsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button type="button" id="addRowBtn" class="btn btn-outline-secondary btn-sm mb-3">+ Add Product</button>
+
+    <template id="productSelectTemplate">
+        @await Component.InvokeAsync("ProductSelect")
+    </template>
+
+    <div class="form-group mb-3">
+        <label class="control-label">Total Amount</label>
+        <input id="totalAmount" class="form-control" readonly />
+    </div>
+
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Index" class="btn btn-secondary">Back to List</a>
 </form>
 
 @section Scripts {
     <script src="~/lib/select2/js/select2.full.min.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+            var rowIndex = 0;
+
+            function recalcRow(row) {
+                var qty = parseFloat(row.find('.qty-input').val()) || 0;
+                var price = parseFloat(row.find('.price-input').val()) || 0;
+                var total = qty * price;
+                row.find('.total-cell').text(total.toFixed(2));
+                row.find('.total-input').val(total.toFixed(2));
+                recalcTotalAmount();
+            }
+
+            function recalcTotalAmount() {
+                var sum = 0;
+                $('#orderDetailsTable .total-input').each(function () {
+                    sum += parseFloat($(this).val()) || 0;
+                });
+                $('#totalAmount').val(sum.toFixed(2));
+            }
+
+            function addRow() {
+                var i = rowIndex++;
+                var productSelect = $('#productSelectTemplate').html().trim();
+                productSelect = $(productSelect)
+                    .attr('id', 'productSelect_' + i)
+                    .attr('name', 'OrderDetails[' + i + '].ProductId')
+                    .prop('outerHTML');
+
+                var row = $(
+                    '<tr>' +
+                    '<td>' + productSelect + '</td>' +
+                    '<td><input type="number" min="1" value="1" class="form-control qty-input" name="OrderDetails[' + i + '].OrderQty" /></td>' +
+                    '<td><input type="number" step="0.01" class="form-control price-input" name="OrderDetails[' + i + '].UnitPrice" /></td>' +
+                    '<td><span class="total-cell">0.00</span><input type="hidden" class="total-input" name="OrderDetails[' + i + '].Total" value="0" /></td>' +
+                    '<td><button type="button" class="btn btn-outline-danger btn-sm remove-row-btn">&times;</button></td>' +
+                    '</tr>'
+                );
+
+                row.find('.product-select').on('change', function () {
+                    var price = $(this).find(':selected').data('price') || 0;
+                    row.find('.price-input').val(price);
+                    recalcRow(row);
+                });
+
+                row.find('.qty-input, .price-input').on('input', function () {
+                    recalcRow(row);
+                });
+
+                row.find('.remove-row-btn').on('click', function () {
+                    row.remove();
+                    recalcTotalAmount();
+                });
+
+                $('#orderDetailsTable tbody').append(row);
+            }
+
+            $('#addRowBtn').on('click', addRow);
+            addRow();
+        });
+    </script>
 }

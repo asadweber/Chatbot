@@ -1,0 +1,9 @@
+@model Chatbot.Models.ProductSelectViewModel
+
+<select name="@Model.FieldName" id="@Model.ElementId" class="form-control product-select">
+    <option value="">-- select --</option>
+    @foreach (var p in Model.Products)
+    {
+        <option value="@p.Id" data-price="@p.Price" selected="@(p.Id == Model.SelectedId)">@p.Name</option>
+    }
+</select>
