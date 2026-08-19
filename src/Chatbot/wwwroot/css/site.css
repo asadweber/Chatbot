@@ -29,3 +29,150 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* ===== Orders pages ===== */
+
+.orders-hero {
+    background: linear-gradient(135deg, #3a2a00 0%, #b8860b 55%, #ffd700 100%);
+    border-radius: 1rem;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 10px 25px rgba(184, 134, 11, 0.35);
+}
+
+.btn-hero {
+    background: #fff;
+    color: #7a5c00;
+    border: none;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-hero:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.15);
+    color: #7a5c00;
+}
+
+.orders-card thead,
+.card thead,
+table thead {
+    background: linear-gradient(90deg, #4a3800 0%, #b8860b 100%);
+}
+
+.orders-card thead th,
+.card thead th {
+    color: #fff;
+    border: none;
+    padding: 0.9rem 1rem;
+}
+
+#ordersTable td {
+    padding: 0.85rem 1rem;
+}
+
+.accent-card {
+    border-left: 5px solid transparent;
+    border-radius: .6rem;
+    overflow: hidden;
+}
+
+.accent-purple,
+.accent-gold {
+    border-left-color: #b8860b;
+}
+
+.accent-pink,
+.accent-amber {
+    border-left-color: #daa520;
+}
+
+.accent-red {
+    border-left-color: #ff5858;
+}
+
+.text-purple,
+.text-gold {
+    color: #8a6500;
+}
+
+.text-pink,
+.text-amber {
+    color: #b8860b;
+}
+
+.text-red {
+    color: #ff5858;
+}
+
+.btn-gradient {
+    background: linear-gradient(90deg, #8a6500, #daa520);
+    border: none;
+    color: #fff;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(184,134,11,.35);
+    color: #fff;
+}
+
+.btn-gradient-outline {
+    border: 1.5px solid #b8860b;
+    color: #8a6500;
+    background: #fff;
+}
+
+.btn-gradient-outline:hover {
+    background: #b8860b;
+    color: #fff;
+}
+
+.btn-gradient-red {
+    background: linear-gradient(90deg, #f857a6, #ff5858);
+    border: none;
+    color: #fff;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.btn-gradient-red:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(255,88,88,.35);
+    color: #fff;
+}
+
+.total-amount-input {
+    color: #8a6500;
+}
+
+.summary-box {
+    background: linear-gradient(135deg, #fff9ec, #fff5f5);
+    border: 1px solid #f0dca0;
+}
+
+#orderDetailsTable td {
+    padding: 0.6rem 0.75rem;
+}
+
+#orderDetailsTable td:first-child {
+    padding-left: 1.5rem;
+}
+
+.badge-status-pending {
+    background: linear-gradient(90deg,#f6d365,#fda085);
+    color: #7a4a00;
+}
+
+.badge-status-completed {
+    background: linear-gradient(90deg,#43e97b,#38f9d7);
+    color: #05512f;
+}
+
+.badge-status-cancelled {
+    background: linear-gradient(90deg,#f857a6,#ff5858);
+    color: #fff;
+}
+
+.badge {
+    padding: 0.5em 0.9em;
+    font-weight: 600;
+}

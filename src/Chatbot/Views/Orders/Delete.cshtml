@@ -3,19 +3,19 @@
     ViewData["Title"] = "Delete Order";
 }
 
-<div class="mb-4">
-    <a asp-action="Index" class="text-decoration-none text-muted small">&larr; Back to Orders</a>
+<div class="orders-hero mb-4">
+    <a asp-action="Index" class="text-decoration-none text-white-50 small">&larr; Back to Orders</a>
 </div>
 
-<div class="card shadow-sm border-0" style="max-width:560px;">
+<div class="card shadow border-0 accent-card accent-red" style="max-width:560px;">
     <div class="card-body p-4">
-        <h1 class="h4 fw-semibold mb-1">Delete Order #@Model.Id</h1>
+        <h1 class="h4 fw-bold mb-1 text-red">Delete Order #@Model.Id</h1>
         <p class="text-muted">This action cannot be undone. Please confirm you want to delete this order.</p>
 
-        <div class="border rounded-3 p-3 mb-4 bg-light-subtle">
+        <div class="rounded-3 p-3 mb-4 summary-box">
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Customer</span>
-                <span class="fw-semibold">@Model.CustomerName</span>
+                <span class="fw-semibold text-purple">@Model.CustomerName</span>
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Order Date</span>
@@ -23,7 +23,7 @@
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Total Amount</span>
-                <span class="fw-semibold">@Model.TotalAmount.ToString("C")</span>
+                <span class="fw-bold text-pink">@Model.TotalAmount.ToString("C")</span>
             </div>
             <div class="d-flex justify-content-between py-1">
                 <span class="text-muted small">Status</span>
@@ -33,8 +33,29 @@
 
         <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
             <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-danger px-4">Delete Order</button>
+            <button type="submit" class="btn btn-gradient-red px-4 fw-semibold">Delete Order</button>
             <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
         </form>
     </div>
 </div>
+
+<style>
+    .orders-hero {
+        background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
+        border-radius: 1rem;
+        padding: 1.75rem 2rem;
+        box-shadow: 0 10px 25px rgba(123, 47, 247, 0.25);
+    }
+    .accent-card { border-left: 5px solid transparent; border-radius: .6rem; overflow: hidden; }
+    .accent-red { border-left-color: #ff5858; }
+    .text-red { color: #ff5858; }
+    .text-purple { color: #7b2ff7; }
+    .text-pink { color: #f107a3; }
+    .summary-box { background: linear-gradient(135deg, #fff5f5, #fff0f6); border: 1px solid #ffe0e0; }
+    .btn-gradient-red {
+        background: linear-gradient(90deg, #f857a6, #ff5858);
+        border: none; color: #fff;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .btn-gradient-red:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(255,88,88,.35); color: #fff; }
+</style>
