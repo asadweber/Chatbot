@@ -34,7 +34,7 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
 
         // Derived summary line: gives the embedding extra signal for queries
         // that don't map to any single field above — order size, value tier,
-        // price spread, how recent the order is.
+        // price spread, how recent the order is, what dominates the order.
         if (details.Count > 0)
         {
             var totalQty = details.Sum(d => d.OrderQty);
@@ -43,6 +43,7 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
             var maxUnitPrice = details.Max(d => d.UnitPrice);
             var valueTier = ValueTier(order.TotalAmount);
             var recency = RecencyPhrase(order.OrderDate);
+            var dominantProduct = details.OrderByDescending(d => d.Total).First();
 
             sb.AppendLine();
             sb.AppendLine("Summary:");
@@ -51,6 +52,17 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
 
             if (details.Count > 1)
                 sb.AppendLine("The customer purchased multiple products in this single order.");
+
+            if (details.Count > 1)
+                sb.AppendLine(string.Create(CultureInfo.InvariantCulture,
+                    $"The largest line item is {dominantProduct.ProductName}, accounting for {dominantProduct.Total:F2} of the order total."));
+
+            var bulkItems = details.Where(d => d.OrderQty >= 5).ToList();
+            if (bulkItems.Count > 0)
+                sb.AppendLine(string.Create(CultureInfo.InvariantCulture,
+                    $"This looks like a bulk purchase: {string.Join(", ", bulkItems.Select(d => $"{d.ProductName} (x{d.OrderQty})"))}."));
+
+            sb.AppendLine(StatusPhrase(order.Status));
         }
 
         return sb.ToString();
@@ -74,4 +86,12 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
             _ => "some time ago"
         };
     }
+
+    private static string StatusPhrase(string status) => status?.Trim().ToLowerInvariant() switch
+    {
+        "completed" => "This order has been completed and fulfilled.",
+        "cancelled" => "This order was cancelled.",
+        "pending" => "This order is still pending fulfillment.",
+        _ => $"This order's current status is {status}."
+    };
 }
