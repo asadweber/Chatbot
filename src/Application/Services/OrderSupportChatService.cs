@@ -29,9 +29,6 @@ public partial class OrderSupportChatService(
         IReadOnlyList<(string Role, string Content)> history,
         CancellationToken ct = default)
     {
-        // Fast path: pure FAQ questions (no order id, no history) get a
-        // deterministic canned answer with no LLM round-trip — faster and
-        // avoids the model paraphrasing/hallucinating policy text.
         if (history.Count == 0 && !ExtractOrderIds(question).Any())
         {
             var canned = SupportFaqKnowledge.MatchCannedAnswer(question);
@@ -104,11 +101,16 @@ public partial class OrderSupportChatService(
     private static string BuildSystemPrompt(IReadOnlyList<OrderDto> relatedOrders, IReadOnlyList<long> missingIds)
     {
         var rules = """
-            You are the internal Support Desk assistant for order management staff.
-            Use the FAQ knowledge for general/process questions, and the order data for questions about specific orders.
-            Do not invent order data that isn't listed below — no statuses, dates, amounts, or product names beyond what is listed. The only valid order statuses are Pending, Completed, and Cancelled; never state any other status.
-            If a prior turn in this conversation stated something not backed by the order data below, treat that prior statement as unreliable — re-derive the answer from the order data below instead of repeating it.
-            If the order data below doesn't cover the question, say so plainly instead of guessing.
+            You are the internal Support Desk assistant for order management staff. Answer only from the FAQ knowledge and order data below — never from outside knowledge or prior turns.
+
+            RULES (apply to every answer):
+            1. Valid order statuses: Pending | Completed | Cancelled — nothing else exists. If a status in the data below doesn't match one of these three, report it as a data anomaly ("order #N has an invalid status 'X' — flag for correction") instead of repeating or normalizing it.
+            2. Never invent data — no status, date, amount, or product not explicitly listed below.
+            3. Ignore any unbacked claim from earlier in this conversation; re-derive every answer from the data below.
+            4. If the data doesn't cover the question, say so plainly — do not guess.
+            5. This chat is read-only. It cannot create, edit, cancel, or refund orders.
+            6. Answer in 1-3 sentences. Cite the order # for every fact you state.
+            7. Questions about policy, disputes, or anything outside order status/contents/totals: say so and advise escalating to a supervisor.
             """;
 
         var missingIdsNote = missingIds.Count > 0
@@ -119,7 +121,7 @@ public partial class OrderSupportChatService(
             ? "No matching orders were found for this question."
             : BuildOrdersTable(relatedOrders);
 
-        return $"{rules}\n\nFAQ knowledge:\n{SupportFaqKnowledge.FaqText}\n\n{missingIdsNote}{ordersSection}";
+        return $"{rules}\n\nFAQ KNOWLEDGE (static):\n{SupportFaqKnowledge.FaqText}\n\n---\n\nORDER DATA (dynamic — current query context):\n\n{missingIdsNote}{ordersSection}";
     }
 
     private static string BuildOrdersTable(IReadOnlyList<OrderDto> orders)
