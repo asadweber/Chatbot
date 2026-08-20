@@ -13,7 +13,7 @@ using Pgvector;
 namespace Infrastructure.Migrations.VectorDb
 {
     [DbContext(typeof(VectorDbContext))]
-    [Migration("20260820112203_InitVector")]
+    [Migration("20260820122505_InitVector")]
     partial class InitVector
     {
         /// <inheritdoc />
@@ -40,7 +40,7 @@ namespace Infrastructure.Migrations.VectorDb
                         .HasColumnType("text");
 
                     b.Property<Vector>("Embedding")
-                        .HasColumnType("vector(1024)");
+                        .HasColumnType("vector(768)");
 
                     b.Property<long>("OrderId")
                         .HasColumnType("bigint");

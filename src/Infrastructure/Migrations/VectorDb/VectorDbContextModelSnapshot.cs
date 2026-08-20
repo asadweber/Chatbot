@@ -37,7 +37,7 @@ namespace Infrastructure.Migrations.VectorDb
                         .HasColumnType("text");
 
                     b.Property<Vector>("Embedding")
-                        .HasColumnType("vector(1024)");
+                        .HasColumnType("vector(768)");
 
                     b.Property<long>("OrderId")
                         .HasColumnType("bigint");

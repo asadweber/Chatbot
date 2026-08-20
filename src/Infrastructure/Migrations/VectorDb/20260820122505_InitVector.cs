@@ -24,7 +24,7 @@ namespace Infrastructure.Migrations.VectorDb
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OrderId = table.Column<long>(type: "bigint", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    Embedding = table.Column<Vector>(type: "vector(1024)", nullable: true),
+                    Embedding = table.Column<Vector>(type: "vector(768)", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
