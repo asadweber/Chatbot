@@ -282,15 +282,19 @@
                     }
 
                     const data = await res.json();
-                    appendMessage('assistant', data.answer);
 
                     const isOrderDetailQuestion = sessionOrderId &&
                         question === formatQuestion(orderDetailQuestionTemplate, sessionOrderId);
-                    if (isOrderDetailQuestion) {
-                        const order = (data.orders || []).find(function (o) { return String(o.id) === String(sessionOrderId); });
-                        if (order && order.orderDetails && order.orderDetails.length > 0) {
-                            appendOrderDetailsTable(order.orderDetails);
-                        }
+                    const order = isOrderDetailQuestion
+                        ? (data.orders || []).find(function (o) { return String(o.id) === String(sessionOrderId); })
+                        : null;
+                    const hasDetails = order && order.orderDetails && order.orderDetails.length > 0;
+
+                    if (hasDetails) {
+                        appendMessage('assistant', 'Here are the order details for order #' + sessionOrderId + ':');
+                        appendOrderDetailsTable(order.orderDetails);
+                    } else {
+                        appendMessage('assistant', data.answer);
                     }
 
                     history.push({ role: 'user', content: question });
