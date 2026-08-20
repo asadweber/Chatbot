@@ -2,6 +2,31 @@
     ViewData["Title"] = "Support Desk";
 }
 
+<style>
+    .typing-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: currentColor;
+        opacity: 0.4;
+        animation: typing-bounce 1.2s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @@keyframes typing-bounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-4px); opacity: 1; }
+    }
+</style>
+
 <div class="orders-hero d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-1 fw-bold text-white">Support Desk</h1>
@@ -63,7 +88,10 @@
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             const history = [];
 
+            let isAsking = false;
+
             function askQuestion(question) {
+                if (isAsking) return;
                 input.value = question;
                 form.requestSubmit();
             }
@@ -117,7 +145,12 @@
                     const faqs = await res.json();
                     faqs.forEach(function (faq) { addFaqChip(faq.question); });
                 } catch {
-                    if (!sessionOrderId) faqChips.textContent = 'Couldn\'t load FAQs.';
+                    if (!sessionOrderId) {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item text-muted small';
+                        li.textContent = 'Couldn\'t load FAQs.';
+                        faqChips.appendChild(li);
+                    }
                 }
             }
 
@@ -138,14 +171,47 @@
                 log.scrollTop = log.scrollHeight;
             }
 
+            function appendTypingIndicator() {
+                const wrap = document.createElement('div');
+                wrap.id = 'typingIndicator';
+                wrap.className = 'mb-2 d-flex align-items-center gap-2';
+
+                const strong = document.createElement('strong');
+                strong.textContent = 'Support Desk:';
+                wrap.appendChild(strong);
+
+                const dots = document.createElement('span');
+                dots.className = 'typing-dots';
+                dots.innerHTML = '<span></span><span></span><span></span>';
+                wrap.appendChild(dots);
+
+                log.appendChild(wrap);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            function removeTypingIndicator() {
+                const el = document.getElementById('typingIndicator');
+                if (el) el.remove();
+            }
+
+            function setAsking(asking) {
+                isAsking = asking;
+                input.disabled = asking;
+                form.querySelector('button[type="submit"]').disabled = asking;
+                faqChips.querySelectorAll('button').forEach(function (btn) { btn.disabled = asking; });
+            }
+
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
+                if (isAsking) return;
+
                 const question = input.value.trim();
                 if (!question) return;
 
                 appendMessage('user', question);
                 input.value = '';
-                input.disabled = true;
+                setAsking(true);
+                appendTypingIndicator();
 
                 try {
                     const res = await fetch('@Url.Action("Ask", "SupportDesk")', {
@@ -157,6 +223,8 @@
                         body: JSON.stringify({ question: question, history: history })
                     });
 
+                    removeTypingIndicator();
+
                     if (!res.ok) {
                         appendMessage('assistant', 'Sorry, something went wrong.');
                         return;
@@ -167,8 +235,11 @@
 
                     history.push({ role: 'user', content: question });
                     history.push({ role: 'assistant', content: data.answer });
+                } catch {
+                    removeTypingIndicator();
+                    appendMessage('assistant', 'Sorry, something went wrong.');
                 } finally {
-                    input.disabled = false;
+                    setAsking(false);
                     input.focus();
                 }
             });
