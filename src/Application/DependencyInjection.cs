@@ -27,6 +27,10 @@ public static class DependencyInjection
         // to Application.
         services.AddScoped<IOllamaEmbeddingService, OllamaEmbeddingService>();
 
+        // Internal Support Desk chat: answers staff questions grounded in the
+        // order semantic-search index above. Stateless per call.
+        services.AddScoped<IOrderSupportChatService, OrderSupportChatService>();
+
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile).Assembly));
 
         return services;
