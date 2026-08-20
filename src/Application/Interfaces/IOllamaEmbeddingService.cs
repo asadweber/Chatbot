@@ -6,7 +6,7 @@ namespace Application.Interfaces;
 /// Generates vector embeddings for text, used both when ingesting document
 /// chunks and when embedding a query for similarity search.
 /// </summary>
-public interface IEmbeddingService
+public interface IOllamaEmbeddingService
 {
     /// <summary>Computes a vector embedding for <paramref name="text"/>.</summary>
     /// <param name="text">The text to embed.</param>

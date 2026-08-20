@@ -15,7 +15,7 @@ namespace Application.Services;
 /// </remarks>
 public class OrderIngestionService(
     IOrderDocumentTextBuilder textBuilder,
-    IEmbeddingService embeddingService,
+    IOllamaEmbeddingService embeddingService,
     IDocumentRepository documentRepository,
     IUnitOfWork uow,
     IMapper mapper,

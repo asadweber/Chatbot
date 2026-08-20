@@ -7,7 +7,7 @@ namespace Application.Services;
 /// <inheritdoc cref="IOrderSemanticSearchService" />
 public class OrderSemanticSearchService(
     IDocumentRepository documentRepository,
-    IEmbeddingService embeddingService,
+    IOllamaEmbeddingService embeddingService,
     IOrderService orderService) : IOrderSemanticSearchService
 {
     /// <inheritdoc />

@@ -5,16 +5,16 @@ using Pgvector;
 namespace Application.Services;
 
 /// <summary>
-/// <see cref="IEmbeddingService"/> implementation backed by a Semantic Kernel
+/// <see cref="IOllamaEmbeddingService"/> implementation backed by a Semantic Kernel
 /// <see cref="ITextEmbeddingGenerationService"/> connected to a local Ollama
 /// embedding model. Converts the generated float vector into a pgvector
 /// <see cref="Vector"/> for storage/querying via Npgsql.
 /// </summary>
-public class EmbeddingService : IEmbeddingService
+public class OllamaEmbeddingService : IOllamaEmbeddingService
 {
     private readonly ITextEmbeddingGenerationService _generator;
 
-    public EmbeddingService(ITextEmbeddingGenerationService generator)
+    public OllamaEmbeddingService(ITextEmbeddingGenerationService generator)
     {
         _generator = generator;
     }

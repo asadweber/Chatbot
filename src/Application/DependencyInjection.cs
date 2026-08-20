@@ -25,7 +25,7 @@ public static class DependencyInjection
         // in the composition root); the implementations live here rather than in
         // Infrastructure to avoid Infrastructure needing a ProjectReference back
         // to Application.
-        services.AddScoped<IEmbeddingService, EmbeddingService>();
+        services.AddScoped<IOllamaEmbeddingService, OllamaEmbeddingService>();
 
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile).Assembly));
 
