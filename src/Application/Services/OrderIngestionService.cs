@@ -25,7 +25,7 @@ public class OrderIngestionService(
     public async Task IndexOrderAsync(OrderDto order, CancellationToken ct = default)
     {
         var content = textBuilder.Build(order);
-        var embedding = await embeddingService.EmbedAsync(content, ct);
+        var embedding = await embeddingService.GenerateEmbeddingAsync(content, ct);
         await documentRepository.UpsertOrderDocumentAsync(order.Id, content, embedding, ct);
         logger.LogInformation("Indexed order {OrderId} for semantic search", order.Id);
     }

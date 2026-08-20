@@ -12,5 +12,5 @@ public interface IEmbeddingService
     /// <param name="text">The text to embed.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The embedding vector (dimension matches the configured embedding model, e.g. 768).</returns>
-    Task<Vector> EmbedAsync(string text, CancellationToken ct = default);
+    Task<Vector> GenerateEmbeddingAsync(string text, CancellationToken ct = default);
 }

@@ -45,7 +45,7 @@ public class DocumentIngestionService : IDocumentIngestionService
         var chunks = new List<DocumentChunk>(chunkTexts.Count);
         foreach (var chunkText in chunkTexts)
         {
-            var embedding = await _embeddings.EmbedAsync(chunkText, ct);
+            var embedding = await _embeddings.GenerateEmbeddingAsync(chunkText, ct);
             chunks.Add(new DocumentChunk { Content = chunkText, Embedding = embedding });
         }
 

@@ -20,7 +20,7 @@ public class EmbeddingService : IEmbeddingService
     }
 
     /// <inheritdoc />
-    public async Task<Vector> EmbedAsync(string text, CancellationToken ct = default)
+    public async Task<Vector> GenerateEmbeddingAsync(string text, CancellationToken ct = default)
     {
         var embedding = await _generator.GenerateEmbeddingAsync(text, cancellationToken: ct);
         return new Vector(embedding);

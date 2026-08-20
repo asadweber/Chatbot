@@ -21,7 +21,7 @@ public class RetrievalService : IRetrievalService
     /// <inheritdoc />
     public async Task<IReadOnlyList<string>> RetrieveRelevantChunksAsync(string query, int topK = 4, CancellationToken ct = default)
     {
-        var queryEmbedding = await _embeddings.EmbedAsync(query, ct);
+        var queryEmbedding = await _embeddings.GenerateEmbeddingAsync(query, ct);
         return await _documents.SearchSimilarChunksAsync(queryEmbedding, topK, ct);
     }
 }

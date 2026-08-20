@@ -13,7 +13,7 @@ public class OrderSemanticSearchService(
     /// <inheritdoc />
     public async Task<IReadOnlyList<OrderDto>> SearchAsync(string query, int topK = 10, CancellationToken ct = default)
     {
-        var queryEmbedding = await embeddingService.EmbedAsync(query, ct);
+        var queryEmbedding = await embeddingService.GenerateEmbeddingAsync(query, ct);
         var orderIds = await documentRepository.SearchSimilarOrdersAsync(queryEmbedding, topK, ct);
 
         var results = new List<OrderDto>(orderIds.Count);
