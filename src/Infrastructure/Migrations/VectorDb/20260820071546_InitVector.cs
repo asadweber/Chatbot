@@ -45,6 +45,22 @@ namespace Infrastructure.Migrations.VectorDb
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrderDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    OrderId = table.Column<long>(type: "bigint", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    Embedding = table.Column<Vector>(type: "vector(768)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderDocuments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ChatMessages",
                 columns: table => new
                 {
@@ -96,6 +112,12 @@ namespace Infrastructure.Migrations.VectorDb
                 name: "IX_DocumentChunks_DocumentId",
                 table: "DocumentChunks",
                 column: "DocumentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDocuments_OrderId",
+                table: "OrderDocuments",
+                column: "OrderId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -106,6 +128,9 @@ namespace Infrastructure.Migrations.VectorDb
 
             migrationBuilder.DropTable(
                 name: "DocumentChunks");
+
+            migrationBuilder.DropTable(
+                name: "OrderDocuments");
 
             migrationBuilder.DropTable(
                 name: "ChatSessions");

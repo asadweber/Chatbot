@@ -26,7 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-        // --- Chatbot / RAG (PostgreSQL + pgvector) ------------------------------
+        // ---  RAG (PostgreSQL + pgvector) ------------------------------
         // DbContext + Semantic Kernel wiring stays here (Infrastructure owns data
         // access/external clients); the service implementations that consume them
         // are registered by Application.AddApplication to avoid a circular

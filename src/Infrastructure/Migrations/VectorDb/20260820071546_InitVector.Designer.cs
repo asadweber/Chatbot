@@ -13,7 +13,7 @@ using Pgvector;
 namespace Infrastructure.Migrations.VectorDb
 {
     [DbContext(typeof(VectorDbContext))]
-    [Migration("20260819140434_InitVector")]
+    [Migration("20260820071546_InitVector")]
     partial class InitVector
     {
         /// <inheritdoc />
@@ -119,6 +119,35 @@ namespace Infrastructure.Migrations.VectorDb
                     b.HasIndex("DocumentId");
 
                     b.ToTable("DocumentChunks");
+                });
+
+            modelBuilder.Entity("Domain.Entities.OrderDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("Embedding")
+                        .HasColumnType("vector(768)");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("OrderDocuments");
                 });
 
             modelBuilder.Entity("Domain.Entities.ChatMessage", b =>

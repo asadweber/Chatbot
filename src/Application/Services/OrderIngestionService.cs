@@ -1,16 +1,24 @@
 using Application.Dtos;
 using Application.Interfaces;
+using AutoMapper;
+using Domain;
 using Domain.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
 /// <inheritdoc cref="IOrderIngestionService" />
+/// <remarks>
+/// Depends on <see cref="IUnitOfWork"/> directly (not <see cref="IOrderService"/>)
+/// to avoid a circular DI dependency: <c>OrderService</c> depends on this service
+/// to index orders after create/update/delete.
+/// </remarks>
 public class OrderIngestionService(
     IOrderDocumentTextBuilder textBuilder,
     IEmbeddingService embeddingService,
     IDocumentRepository documentRepository,
-    IOrderService orderService,
+    IUnitOfWork uow,
+    IMapper mapper,
     ILogger<OrderIngestionService> logger) : IOrderIngestionService
 {
     /// <inheritdoc />
@@ -25,8 +33,8 @@ public class OrderIngestionService(
     /// <inheritdoc />
     public async Task ReindexAllAsync(CancellationToken ct = default)
     {
-        var orders = await orderService.GetAllAsync();
-        foreach (var order in orders)
+        var orders = await uow.Orders.GetAllWithDetailsAsync();
+        foreach (var order in mapper.Map<List<OrderDto>>(orders))
             await IndexOrderAsync(order, ct);
     }
 

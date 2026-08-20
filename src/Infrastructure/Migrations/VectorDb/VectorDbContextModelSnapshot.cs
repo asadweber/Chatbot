@@ -118,6 +118,35 @@ namespace Infrastructure.Migrations.VectorDb
                     b.ToTable("DocumentChunks");
                 });
 
+            modelBuilder.Entity("Domain.Entities.OrderDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Vector>("Embedding")
+                        .HasColumnType("vector(768)");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("OrderDocuments");
+                });
+
             modelBuilder.Entity("Domain.Entities.ChatMessage", b =>
                 {
                     b.HasOne("Domain.Entities.ChatSession", "Session")
