@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chatbot.Controllers;
 
-public class OrdersController(IOrderService orderService) : Controller
+public class OrdersController(IOrderService orderService, IOrderIngestionService orderIngestion, IOrderSemanticSearchService orderSearch) : Controller
 {
     public IActionResult Index()
     {
@@ -78,6 +78,33 @@ public class OrdersController(IOrderService orderService) : Controller
     public async Task<IActionResult> DeleteConfirmed(long id)
     {
         await orderService.DeleteAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
+
+    public IActionResult Search()
+    {
+        return View(new List<OrderDto>());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Search(string query, CancellationToken ct)
+    {
+        ViewBag.Query = query;
+
+        var results = string.IsNullOrWhiteSpace(query)
+            ? []
+            : await orderSearch.SearchAsync(query, 10, ct);
+
+        return View(results);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReindexAll(CancellationToken ct)
+    {
+        await orderIngestion.ReindexAllAsync(ct);
+        TempData["Message"] = "Order semantic index rebuilt.";
         return RedirectToAction(nameof(Index));
     }
 }

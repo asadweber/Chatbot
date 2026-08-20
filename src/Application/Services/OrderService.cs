@@ -3,10 +3,11 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
-public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
+public class OrderService(IUnitOfWork uow, IMapper mapper, IOrderIngestionService orderIngestion, ILogger<OrderService> logger) : IOrderService
 {
     public async Task<List<OrderDto>> GetAllAsync()
     {
@@ -35,7 +36,10 @@ public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
         await uow.Orders.AddAsync(order);
         await uow.SaveChangesAsync();                                    // 1) flush Order row, Id assigned
         await uow.CommitAsync();                                         // both rows commit atomically
-        return mapper.Map<OrderDto>(order);
+
+        var dto = mapper.Map<OrderDto>(order);
+        await TryIndexAsync(dto);
+        return dto;
     }
 
 
@@ -61,6 +65,8 @@ public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
 
         await uow.Orders.Update(existing);
         await uow.SaveChangesAsync();
+
+        await TryIndexAsync(mapper.Map<OrderDto>(existing));
         return true;
     }
 
@@ -70,7 +76,29 @@ public class OrderService(IUnitOfWork uow,  IMapper mapper) : IOrderService
         if (order is null) return false;
         uow.Orders.Remove(order);
         await uow.SaveChangesAsync();
+
+        try
+        {
+            await orderIngestion.DeleteOrderDocumentAsync(id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to remove semantic index for deleted order {OrderId}", id);
+        }
+
         return true;
+    }
+
+    private async Task TryIndexAsync(OrderDto dto)
+    {
+        try
+        {
+            await orderIngestion.IndexOrderAsync(dto);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to index order {OrderId} for semantic search", dto.Id);
+        }
     }
 
     public async Task<DataTableResponseDto<OrderDto>> GetPagedAsync(DataTableRequestDto request)

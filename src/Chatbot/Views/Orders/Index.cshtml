@@ -7,8 +7,20 @@
         <h1 class="h3 mb-1 fw-bold text-white">Orders</h1>
         <p class="text-white-50 mb-0">Manage customer orders and line items</p>
     </div>
-    <a asp-action="Create" class="btn btn-hero px-4 fw-semibold">+ New Order</a>
+    <div class="d-flex gap-2">
+        <a asp-action="Search" class="btn btn-outline-light px-4 fw-semibold">Semantic Search</a>
+        <form asp-action="ReindexAll" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-light px-4 fw-semibold">Reindex Orders</button>
+        </form>
+        <a asp-action="Create" class="btn btn-hero px-4 fw-semibold">+ New Order</a>
+    </div>
 </div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
 
 <link rel="stylesheet" href="~/lib/datatables/dataTables.bootstrap5.min.css" />
 

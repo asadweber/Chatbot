@@ -19,6 +19,9 @@ public class VectorDbContext : DbContext
     /// <summary>Text chunks extracted from documents, with their embeddings.</summary>
     public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
 
+    /// <summary>Semantic (row-level) documents for orders, with their embeddings.</summary>
+    public DbSet<OrderDocument> OrderDocuments => Set<OrderDocument>();
+
     /// <summary>Chat conversations.</summary>
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
 
@@ -46,6 +49,14 @@ public class VectorDbContext : DbContext
                   .WithMany(d => d.Chunks)
                   .HasForeignKey(c => c.DocumentId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderDocument>(entity =>
+        {
+            // 768 = embedding dimension produced by the configured Ollama
+            // embedding model (nomic-embed-text:v1.5 by default).
+            entity.Property(d => d.Embedding).HasColumnType("vector(768)");
+            entity.HasIndex(d => d.OrderId).IsUnique();
         });
 
         modelBuilder.Entity<ChatMessage>(entity =>

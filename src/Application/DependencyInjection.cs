@@ -13,6 +13,13 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICustomerService, CustomerService>();
 
+        // Row-level semantic RAG for orders (see docs/plan): renders each order
+        // to text, embeds it, and stores it alongside the existing document
+        // RAG data in the pgvector-backed VectorDbContext.
+        services.AddScoped<IOrderDocumentTextBuilder, OrderDocumentTextBuilder>();
+        services.AddScoped<IOrderIngestionService, OrderIngestionService>();
+        services.AddScoped<IOrderSemanticSearchService, OrderSemanticSearchService>();
+
         // Chatbot / RAG services. Their DbContext + Semantic Kernel dependencies
         // are registered by Infrastructure.AddInfrastructure (called before this
         // in the composition root); the implementations live here rather than in
