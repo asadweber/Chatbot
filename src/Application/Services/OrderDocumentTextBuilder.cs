@@ -18,6 +18,10 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
         sb.AppendLine();
         sb.AppendLine("Customer:");
         sb.AppendLine(string.IsNullOrWhiteSpace(order.CustomerName) ? "Unknown" : order.CustomerName);
+        if (!string.IsNullOrWhiteSpace(order.Industry))
+            sb.AppendLine($"Industry: {order.Industry}");
+        if (!string.IsNullOrWhiteSpace(order.City) || !string.IsNullOrWhiteSpace(order.State))
+            sb.AppendLine($"Location: {string.Join(", ", new[] { order.City, order.State }.Where(s => !string.IsNullOrWhiteSpace(s)))}");
         sb.AppendLine();
         sb.AppendLine("Order Date:");
         sb.AppendLine(order.OrderDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));

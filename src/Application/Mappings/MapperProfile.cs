@@ -19,6 +19,10 @@ public class MapperProfile : Profile
 
         CreateMap<Order, OrderDto>()
             .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.Name))
+            .ForMember(d => d.Industry, o => o.MapFrom(s => s.Customer.Industry))
+            .ForMember(d => d.City, o => o.MapFrom(s => s.Customer.City))
+            .ForMember(d => d.State, o => o.MapFrom(s => s.Customer.State))
+
             .ReverseMap()
             .ForMember(d => d.OrderDate, o => o.Ignore())
             .ForMember(d => d.TotalAmount, o => o.Ignore())

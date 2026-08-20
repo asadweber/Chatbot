@@ -11,6 +11,7 @@ public class OrderDto
     public string Status { get; set; } = "Pending";
 
     public List<OrderDetailDto> OrderDetails { get; set; } = [];
-
-
+    public string Industry { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;   
 }
