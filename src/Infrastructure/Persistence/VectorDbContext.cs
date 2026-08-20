@@ -33,9 +33,9 @@ public class VectorDbContext : DbContext
 
         modelBuilder.Entity<OrderDocument>(entity =>
         {
-            // 768 = embedding dimension produced by the configured Ollama
-            // embedding model (nomic-embed-text:v1.5 by default).
-            entity.Property(d => d.Embedding).HasColumnType("vector(768)");
+            // 1024 = embedding dimension produced by the configured Ollama
+            // embedding model (bge-m3:latest by default).
+            entity.Property(d => d.Embedding).HasColumnType("vector(1024)");
             entity.HasIndex(d => d.OrderId).IsUnique();
         });
 

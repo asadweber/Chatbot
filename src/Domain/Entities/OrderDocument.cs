@@ -24,7 +24,7 @@ public class OrderDocument
 
     /// <summary>
     /// Vector embedding of <see cref="Content"/> (pgvector column,
-    /// dimension 768 — see <c>VectorDbContext.OnModelCreating</c>).
+    /// dimension 1024 — see <c>VectorDbContext.OnModelCreating</c>).
     /// </summary>
     public Vector? Embedding { get; set; }
 
