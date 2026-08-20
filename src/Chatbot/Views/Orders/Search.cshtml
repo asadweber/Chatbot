@@ -17,7 +17,7 @@
         <form asp-action="Search" method="post" class="d-flex gap-2">
             @Html.AntiForgeryToken()
             <input type="text" name="query" value="@query" class="form-control"
-                   placeholder="e.g. Find orders from customers who frequently buy laptops" />
+                   placeholder="e.g. Find orders from customers" />
             <button type="submit" class="btn btn-hero px-4 fw-semibold">Search</button>
         </form>
     </div>
