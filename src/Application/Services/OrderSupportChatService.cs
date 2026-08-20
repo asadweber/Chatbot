@@ -13,11 +13,6 @@ public partial class OrderSupportChatService(
 {
     private const int ContextOrderCount = 5;
 
-    // Caps how many prior turns are sent to the LLM. Unbounded history grows
-    // token cost/latency linearly with conversation length for no accuracy
-    // benefit past a few turns of context.
-    private const int MaxHistoryTurns = 10;
-
     // Requires an explicit "order" word or "#" prefix so stray numbers (prices,
     // quantities) in the conversation aren't mistaken for order ids.
     [GeneratedRegex(@"(?:order\s*(?:id)?\s*#?|#)\s*(\d{1,10})", RegexOptions.IgnoreCase)]
@@ -35,14 +30,10 @@ public partial class OrderSupportChatService(
             if (canned is not null) return new SupportChatResult(canned, []);
         }
 
-        var recentHistory = history.Count > MaxHistoryTurns
-            ? history.Skip(history.Count - MaxHistoryTurns).ToList()
-            : history;
-
-        var (relatedOrders, missingIds) = await ResolveOrdersAsync(question, recentHistory, ct);
+        var (relatedOrders, missingIds) = await ResolveOrdersAsync(question, history, ct);
 
         var chat = new ChatHistory(BuildSystemPrompt(relatedOrders, missingIds));
-        foreach (var (role, content) in recentHistory)
+        foreach (var (role, content) in history)
             chat.AddMessage(role.Equals("assistant", StringComparison.OrdinalIgnoreCase) ? AuthorRole.Assistant : AuthorRole.User, content);
         chat.AddUserMessage(question);
 
