@@ -23,6 +23,15 @@ public partial class OrderSupportChatService(
         IReadOnlyList<(string Role, string Content)> history,
         CancellationToken ct = default)
     {
+        // Fast path: pure FAQ questions (no order id, no history) get a
+        // deterministic canned answer with no LLM round-trip — faster and
+        // avoids the model paraphrasing/hallucinating policy text.
+        if (history.Count == 0 && !ExtractOrderIds(question).Any())
+        {
+            var canned = MatchCannedFaq(question);
+            if (canned is not null) return new SupportChatResult(canned, []);
+        }
+
         var relatedOrders = (await orderSearch.SearchAsync(question, ContextOrderCount, ct)).ToList();
 
         // Semantic similarity search doesn't reliably find an explicitly
@@ -72,7 +81,46 @@ public partial class OrderSupportChatService(
         - To look up a specific order, ask by its order ID (e.g. "status of order 12").
         - To find orders matching a description (e.g. "high-value orders", "orders with laptops"), ask in plain language and the system will search for semantically similar orders.
         - Staff can create, edit, and delete orders from the Orders section of the app; this chat is read-only and cannot modify orders.
+
+        Returns, refunds and cancellations:
+        - This chat cannot process returns, refunds, or cancellations. Direct the customer/requester to the order's owning team or update the order status manually in the Orders section.
+        - An order should only be marked Cancelled before it has shipped; once Completed, treat it as a return, not a cancellation.
+
+        Escalation:
+        - If a question is about a policy, dispute, or anything outside order status/contents/totals, say so and advise escalating to a supervisor rather than guessing.
         """;
+
+    // Exact/keyword canned answers for the most common support questions,
+    // checked before the FAQ text is even sent to the LLM. Keys are matched
+    // as case-insensitive substrings of the question.
+    private static readonly (string[] Keywords, string Answer)[] CannedFaqs =
+    [
+        (["what does pending mean", "pending status", "what is pending"],
+            "Pending means the order has been placed but not yet fulfilled."),
+        (["what does completed mean", "completed status", "what is completed"],
+            "Completed means the order has been fulfilled and closed out."),
+        (["what does cancelled mean", "cancelled status", "what is cancelled"],
+            "Cancelled means the order was cancelled and will not be fulfilled."),
+        (["how is the total", "how is total amount calculated", "how do you calculate the total"],
+            "Each line item's total is quantity x unit price, and the order's total amount is the sum of all its line items' totals."),
+        (["process a refund", "issue a refund", "refund"],
+            "This chat can't process refunds. Direct the request to the order's owning team, or update the order status manually in the Orders section."),
+        (["cancel an order", "how do i cancel"],
+            "Orders can only be cancelled before they've shipped. Update the order's status to Cancelled from the Orders section; if it's already Completed, treat it as a return instead."),
+        (["create a new order", "how do i create an order", "add an order"],
+            "Go to the Orders section and use the \"+ New Order\" button to create an order."),
+    ];
+
+    private static string? MatchCannedFaq(string question)
+    {
+        var normalized = question.Trim().ToLowerInvariant();
+        foreach (var (keywords, answer) in CannedFaqs)
+        {
+            if (keywords.Any(normalized.Contains))
+                return answer;
+        }
+        return null;
+    }
 
     private static string BuildSystemPrompt(IReadOnlyList<OrderDto> relatedOrders)
     {
