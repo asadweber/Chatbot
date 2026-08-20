@@ -1,5 +1,3 @@
-using Domain.Entities;
-
 namespace Application.Dtos;
 
 [Serializable]

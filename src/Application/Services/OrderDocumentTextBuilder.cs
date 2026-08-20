@@ -1,7 +1,7 @@
-using System.Globalization;
-using System.Text;
 using Application.Dtos;
 using Application.Interfaces;
+using System.Globalization;
+using System.Text;
 
 namespace Application.Services;
 

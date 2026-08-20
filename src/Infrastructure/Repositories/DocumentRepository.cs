@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories;
 /// </summary>
 public class DocumentRepository(VectorDbContext context) : IDocumentRepository
 {
-    
+
 
     /// <inheritdoc />
     public async Task UpsertOrderDocumentAsync(long orderId, string content, Vector embedding, CancellationToken ct = default)

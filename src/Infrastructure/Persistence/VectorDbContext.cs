@@ -13,11 +13,11 @@ public class VectorDbContext : DbContext
 {
     public VectorDbContext(DbContextOptions<VectorDbContext> options) : base(options) { }
 
-   
+
     /// <summary>Semantic (row-level) documents for orders, with their embeddings.</summary>
     public DbSet<OrderDocument> OrderDocuments => Set<OrderDocument>();
 
-   
+
     /// <summary>
     /// Configures the pgvector extension and entity relationships: chunk
     /// embeddings as <c>vector(768)</c> columns, and cascade-delete
@@ -30,7 +30,7 @@ public class VectorDbContext : DbContext
         // (e.g. cosine distance "<=>") to be available in PostgreSQL.
         modelBuilder.HasPostgresExtension("vector");
 
-       
+
         modelBuilder.Entity<OrderDocument>(entity =>
         {
             // 768 = embedding dimension produced by the configured Ollama
@@ -39,6 +39,6 @@ public class VectorDbContext : DbContext
             entity.HasIndex(d => d.OrderId).IsUnique();
         });
 
-       
+
     }
 }

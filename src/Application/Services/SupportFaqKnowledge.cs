@@ -59,7 +59,7 @@ public static class SupportFaqKnowledge
         new("How do I edit an order?", ["edit an order", "update an order"],
             "Go to the Orders section, open the order, and use the Edit action there. This chat is read-only and cannot modify orders."),
         new("How do I delete an order?", ["delete an order", "remove an order"],
-            "Go to the Orders section and use the Delete action on the order. This chat is read-only and cannot delete orders."),        
+            "Go to the Orders section and use the Delete action on the order. This chat is read-only and cannot delete orders."),
     ];
 
     /// <summary>All canned FAQ entries, for display in the Support Desk UI.</summary>

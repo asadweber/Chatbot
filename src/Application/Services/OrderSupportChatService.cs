@@ -1,7 +1,7 @@
-using System.Text.RegularExpressions;
 using Application.Dtos;
 using Application.Interfaces;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System.Text.RegularExpressions;
 
 namespace Application.Services;
 

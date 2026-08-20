@@ -1,6 +1,6 @@
-using Serilog;
 using Application;
 using Infrastructure;
+using Serilog;
 
 // ============================================================================
 // Application entry point and composition root.
