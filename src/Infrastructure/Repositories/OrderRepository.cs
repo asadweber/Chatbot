@@ -26,6 +26,21 @@ public class OrderRepository(AppDbContext context)
             .ToListAsync();
     }
 
+    public Task<int> CountAsync() => Set.CountAsync();
+
+    public async Task<IReadOnlyList<Order>> GetChunkWithDetailsAsync(int skip, int take)
+    {
+        return await Set
+            .Include(o => o.Customer)
+            .Include(o => o.OrderDetails)
+                .ThenInclude(d => d.Product)
+            .OrderBy(o => o.Id)
+            .Skip(skip)
+            .Take(take)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<(IReadOnlyList<Order> Items, int TotalCount, int FilteredCount)> GetPagedAsync(
         int skip, int take, string? searchTerm, string? sortColumn, bool sortAscending)
     {

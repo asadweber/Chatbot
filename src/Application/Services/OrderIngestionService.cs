@@ -30,12 +30,23 @@ public class OrderIngestionService(
         logger.LogInformation("Indexed order {OrderId} for semantic search", order.Id);
     }
 
+    private const int ReindexChunkSize = 100;
+
     /// <inheritdoc />
     public async Task ReindexAllAsync(CancellationToken ct = default)
     {
-        var orders = await uow.Orders.GetAllWithDetailsAsync();
-        foreach (var order in mapper.Map<List<OrderDto>>(orders))
-            await IndexOrderAsync(order, ct);
+        var total = await uow.Orders.CountAsync();
+
+        for (var skip = 0; skip < total; skip += ReindexChunkSize)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var chunk = await uow.Orders.GetChunkWithDetailsAsync(skip, ReindexChunkSize);
+            foreach (var order in mapper.Map<List<OrderDto>>(chunk))
+                await IndexOrderAsync(order, ct);
+
+            logger.LogInformation("Reindexed orders {Skip}-{End} of {Total}", skip, Math.Min(skip + ReindexChunkSize, total), total);
+        }
     }
 
     /// <inheritdoc />
