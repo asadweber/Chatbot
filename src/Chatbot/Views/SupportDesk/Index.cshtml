@@ -79,7 +79,7 @@
                 sessionArea.classList.remove('d-none');
                 loadFaqs();
 
-                askQuestion('What is the status of order #' + orderId + '?');
+                askQuestion('What is the status and customer name of order #' + orderId + '?');
             });
 
             function addFaqChip(question) {
@@ -98,7 +98,7 @@
                 // than a static answer, so it must be added client-side
                 // instead of coming from the static FAQ list.
                 if (sessionOrderId) {
-                    addFaqChip('What is the current status of order #' + sessionOrderId + '?');
+                    addFaqChip('What is the current status and customer name of order #' + sessionOrderId + '?');
                 }
 
                 try {
