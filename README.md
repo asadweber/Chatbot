@@ -6,6 +6,12 @@ an LLM that grounds its answers in relevant excerpts retrieved from those
 documents — running entirely on local infrastructure via Ollama, with no data
 leaving your machine.
 
+The app also includes a standard Customers/Orders/Products management
+section (SQL Server-backed CRUD) and a second RAG pipeline — an internal
+**Support Desk** chat that grounds staff Q&A in semantically retrieved order
+data instead of uploaded documents. See [Order support & Support Desk
+chat](#order-support--support-desk-chat) below.
+
 ## Purpose
 
 Plain LLM chat answers from the model's training data alone, which can be
@@ -69,17 +75,29 @@ Why this matters in practice:
 
 ## Project structure
 
+Layered solution (`Chatbot.slnx`): `Domain` (entities, repository
+interfaces) → `Infrastructure` (EF Core DbContexts, repositories,
+Semantic Kernel/Ollama wiring) → `Application` (business services,
+AutoMapper) / `Application.Dtos` (shared DTOs) → `Chatbot` (ASP.NET Core
+MVC entry point).
+
 ```
-Controllers/   HomeController (landing/error), ChatController (sessions & RAG chat),
-               DocumentsController (upload & ingestion)
-Services/      IChatService/OllamaChatService, IEmbeddingService/OllamaEmbeddingService,
-               IRetrievalService/RetrievalService,
-               IDocumentIngestionService/DocumentIngestionService
-Models/        EF entities (Document, DocumentChunk, ChatSession, ChatMessage) + view models
-Data/          ApplicationDbContext — EF Core context, pgvector config, relationships
-Migrations/    EF Core database migrations
-Views/         Razor views (Home, Chat, Documents)
+Chatbot/Controllers/   HomeController, CustomersController, OrdersController,
+                       ProductsController (CRUD over AppDbContext),
+                       SupportDeskController (order-grounded RAG chat)
+Application/Services/  OllamaEmbeddingService, OrderIngestionService,
+                       OrderSemanticSearchService, OrderSupportChatService,
+                       SupportFaqKnowledge, Order/Product/CustomerService
+Infrastructure/        AppDbContext (SQL Server: Customers/Orders/Products),
+                       VectorDbContext (PostgreSQL + pgvector: documents,
+                       chunks, embeddings, order semantic-search index)
+Domain/Entities/       Customer, Order, OrderDetail, OrderDocument, Product
+Chatbot/Views/         Razor views (Home, Chat, Documents, Orders,
+                       Customers, Products, SupportDesk)
 ```
+
+See [CLAUDE.md](CLAUDE.md) at the repo root for the full architecture
+breakdown and build/migration commands.
 
 ## Endpoints
 
@@ -112,6 +130,35 @@ search — see `ApplicationDbContext.OnModelCreating` for the column/index setup
 and `RetrievalService` for the query that ranks `DocumentChunk` rows by
 distance to the question's embedding.
 
+## Order support & Support Desk chat
+
+Beyond the document-upload RAG chat above, the app runs a second, parallel
+RAG pipeline over structured order data:
+
+1. **Ingestion** — each `Order` row (with its line items) is rendered to
+   text (`OrderDocumentTextBuilder`), embedded via the same Ollama embedding
+   model, and stored as an `OrderDocument` row in the same pgvector-backed
+   store used for documents (`OrderIngestionService`). Triggered via
+   "Reindex" on the Orders page, or automatically as orders change.
+2. **Retrieval** — a staff question is embedded and matched against
+   `OrderDocument` rows by cosine distance (`OrderSemanticSearchService`),
+   returning the most relevant orders. The `Orders/Search` page exposes this
+   directly as a semantic order search.
+3. **Chat** — `SupportDeskController` / `OrderSupportChatService` power a
+   read-only staff chat (`/SupportDesk`) grounded in that retrieval:
+   - Common questions (e.g. "what does Pending mean?", "how do I cancel an
+     order?") are answered instantly from a canned FAQ list
+     (`SupportFaqKnowledge`) without calling the LLM.
+   - Questions naming a specific order (`#123`, "order id 123") resolve that
+     order directly, even if it wasn't returned by semantic search; ids that
+     don't exist are reported to the LLM as missing rather than guessed at.
+   - Otherwise, semantically related orders are retrieved and fed to the LLM
+     as grounding context alongside the FAQ text and conversation history.
+
+This chat is strictly read-only — order status, contents, and totals can
+only be viewed here; creating, editing, or deleting orders happens in the
+Orders section of the app.
+
 ## Configuration
 
 Set in `appsettings.json` (or environment overrides / user secrets):
@@ -119,7 +166,8 @@ Set in `appsettings.json` (or environment overrides / user secrets):
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=<db>;Username=<user>;Password=<password>"
+    "DefaultConnection": "Server=<host>;Database=<db>;Trusted_Connection=True;TrustServerCertificate=True",
+    "PostgresDefaultConnection": "Host=localhost;Port=5432;Database=<db>;Username=<user>;Password=<password>"
   },
   "Ollama": {
     "Endpoint": "http://localhost:11434",
@@ -128,6 +176,10 @@ Set in `appsettings.json` (or environment overrides / user secrets):
   }
 }
 ```
+
+`DefaultConnection` (SQL Server) backs Customers/Orders/Products;
+`PostgresDefaultConnection` (PostgreSQL + pgvector) backs the document and
+order-semantic-search RAG data.
 
 ## Running locally
 
@@ -138,9 +190,10 @@ Set in `appsettings.json` (or environment overrides / user secrets):
    ollama pull nomic-embed-text
    ```
 3. Update the connection string and Ollama settings in `appsettings.json`.
-4. Apply EF Core migrations:
+4. Apply EF Core migrations for both DbContexts:
    ```
-   dotnet ef database update
+   dotnet ef database update -c AppDbContext -p src/Infrastructure -s src/Chatbot
+   dotnet ef database update -c VectorDbContext -p src/Infrastructure -s src/Chatbot
    ```
 5. Run the app:
    ```
