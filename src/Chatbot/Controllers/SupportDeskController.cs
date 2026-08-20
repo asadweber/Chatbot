@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chatbot.Controllers;
@@ -11,6 +12,10 @@ namespace Chatbot.Controllers;
 public class SupportDeskController(IOrderSupportChatService supportChat) : Controller
 {
     public IActionResult Index() => View();
+
+    [HttpGet]
+    public IActionResult Faqs() =>
+        Json(SupportFaqKnowledge.AllEntries.Select(e => new { question = e.DisplayQuestion, answer = e.Answer }));
 
     public class AskRequest
     {

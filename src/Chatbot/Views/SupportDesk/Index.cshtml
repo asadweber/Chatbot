@@ -9,27 +9,100 @@
     </div>
 </div>
 
-<div class="card shadow border-0 orders-card">
+<div id="startCard" class="card shadow border-0 orders-card mb-3">
     <div class="card-body">
-        <div id="chatLog" class="mb-3" style="max-height: 55vh; overflow-y: auto;"></div>
-
-        <form id="chatForm" class="d-flex gap-2">
-            @Html.AntiForgeryToken()
-            <input type="text" id="questionInput" class="form-control"
-                   placeholder="" autocomplete="off" />
-            <button type="submit" class="btn btn-hero px-4 fw-semibold">Ask</button>
+        <h2 class="h6 fw-semibold mb-3">Start a session</h2>
+        <form id="startForm" class="d-flex gap-2">
+            <input type="text" id="orderIdInput" class="form-control" style="max-width: 220px;"
+                   placeholder="Order Id" autocomplete="off" inputmode="numeric" pattern="\d+" required />
+            <button type="submit" class="btn btn-hero px-4 fw-semibold">Start session</button>
         </form>
+        <p class="text-muted small mt-2 mb-0">Enter the order id to start the session.</p>
+    </div>
+</div>
+
+<div id="sessionArea" class="d-none">
+    <div class="card shadow border-0 orders-card mb-3">
+        <div class="card-body">
+            <h2 class="h6 fw-semibold mb-3">Frequently asked questions</h2>
+            <div id="faqChips" class="d-flex flex-wrap gap-2">
+                <span class="text-muted small">Loading FAQs...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow border-0 orders-card">
+        <div class="card-body">
+            <div id="chatLog" class="mb-3" style="max-height: 55vh; overflow-y: auto;"></div>
+
+            <form id="chatForm" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="text" id="questionInput" class="form-control"
+                       placeholder="" autocomplete="off" />
+                <button type="submit" class="btn btn-hero px-4 fw-semibold">Ask</button>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
         (function () {
+            const startCard = document.getElementById('startCard');
+            const startForm = document.getElementById('startForm');
+            const orderIdInput = document.getElementById('orderIdInput');
+            const sessionArea = document.getElementById('sessionArea');
             const log = document.getElementById('chatLog');
             const form = document.getElementById('chatForm');
             const input = document.getElementById('questionInput');
+            const faqChips = document.getElementById('faqChips');
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             const history = [];
+
+            function askQuestion(question) {
+                input.value = question;
+                form.requestSubmit();
+            }
+
+            startForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const orderId = orderIdInput.value.trim();
+                if (!orderId) {
+                    orderIdInput.reportValidity();
+                    return;
+                }
+
+                startCard.classList.add('d-none');
+                sessionArea.classList.remove('d-none');
+                loadFaqs();
+
+                askQuestion('What is the status of order #' + orderId + '?');
+            });
+
+            async function loadFaqs() {
+                try {
+                    const res = await fetch('@Url.Action("Faqs", "SupportDesk")');
+                    if (!res.ok) throw new Error('FAQ request failed');
+                    const faqs = await res.json();
+
+                    faqChips.innerHTML = '';
+                    if (faqs.length === 0) {
+                        faqChips.textContent = 'No FAQs available.';
+                        return;
+                    }
+
+                    faqs.forEach(function (faq) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-outline-secondary btn-sm';
+                        btn.textContent = faq.question;
+                        btn.addEventListener('click', function () { askQuestion(faq.question); });
+                        faqChips.appendChild(btn);
+                    });
+                } catch {
+                    faqChips.textContent = 'Couldn\'t load FAQs.';
+                }
+            }
 
             function appendMessage(role, text) {
                 const wrap = document.createElement('div');
