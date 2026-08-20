@@ -86,7 +86,13 @@
             const input = document.getElementById('questionInput');
             const faqChips = document.getElementById('faqChips');
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const customerDetailQuestionTemplate = '@Html.Raw(ViewData["CustomerDetailQuestionTemplate"])';
+            const currentStatusQuestionTemplate = '@Html.Raw(ViewData["CurrentStatusQuestionTemplate"])';
             const history = [];
+
+            function formatQuestion(template, orderId) {
+                return template.replace('{0}', orderId);
+            }
 
             let isAsking = false;
 
@@ -111,7 +117,7 @@
                 sessionArea.classList.remove('d-none');
                 loadFaqs();
 
-                askQuestion('What is the customer detail of order #' + orderId + '?');
+                askQuestion(formatQuestion(customerDetailQuestionTemplate, orderId));
             });
 
             function addFaqChip(question) {
@@ -135,8 +141,8 @@
                 // than a static answer, so it must be added client-side
                 // instead of coming from the static FAQ list.
                 if (sessionOrderId) {
-                    addFaqChip('What is the customer detail of order #' + sessionOrderId + '?');
-                    addFaqChip('What is the current status of order #' + sessionOrderId + '?');
+                    addFaqChip(formatQuestion(customerDetailQuestionTemplate, sessionOrderId));
+                    addFaqChip(formatQuestion(currentStatusQuestionTemplate, sessionOrderId));
                 }
 
                 try {

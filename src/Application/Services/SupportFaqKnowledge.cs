@@ -35,6 +35,13 @@ public static class SupportFaqKnowledge
     /// <summary>One canned FAQ entry: a display question shown in the UI, the substrings that match it, and its answer.</summary>
     public record FaqEntry(string DisplayQuestion, string[] Keywords, string Answer);
 
+    // Order-scoped question templates: no fixed answer (depends on which
+    // order), so they're formatted with the session's order id and asked
+    // through the normal chat/LLM flow instead of being matched as a canned
+    // answer. {0} is replaced with the order id.
+    public const string CustomerDetailQuestionTemplate = "What is the customer detail of order #{0}?";
+    public const string CurrentStatusQuestionTemplate = "What is the current status of order #{0}?";
+
     // Exact/keyword canned answers for the most common support questions,
     // checked before the FAQ text is even sent to the LLM. Keywords are
     // matched as case-insensitive substrings of the question. DisplayQuestion

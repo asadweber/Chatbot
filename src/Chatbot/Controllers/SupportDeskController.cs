@@ -11,7 +11,12 @@ namespace Chatbot.Controllers;
 /// </summary>
 public class SupportDeskController(IOrderSupportChatService supportChat) : Controller
 {
-    public IActionResult Index() => View();
+    public IActionResult Index()
+    {
+        ViewData["CustomerDetailQuestionTemplate"] = SupportFaqKnowledge.CustomerDetailQuestionTemplate;
+        ViewData["CurrentStatusQuestionTemplate"] = SupportFaqKnowledge.CurrentStatusQuestionTemplate;
+        return View();
+    }
 
     [HttpGet]
     public IActionResult Faqs() =>
