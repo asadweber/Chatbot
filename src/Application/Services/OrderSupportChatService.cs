@@ -41,19 +41,13 @@ public partial class OrderSupportChatService(
 
         var (relatedOrders, missingIds) = await ResolveOrdersAsync(question, recentHistory, ct);
 
-        
         var chat = new ChatHistory(BuildSystemPrompt(relatedOrders, missingIds));
-
-
-
         foreach (var (role, content) in recentHistory)
             chat.AddMessage(role.Equals("assistant", StringComparison.OrdinalIgnoreCase) ? AuthorRole.Assistant : AuthorRole.User, content);
-      
         chat.AddUserMessage(question);
 
         var response = await chatCompletion.GetChatMessageContentAsync(chat, cancellationToken: ct);
-
-        var answer = response.Content ?? "Sorry, I couldn't come up with an answer.";
+        var answer = string.IsNullOrWhiteSpace(response.Content) ? "Sorry, I couldn't come up with an answer." : response.Content;
 
         return new SupportChatResult(answer, relatedOrders);
     }
