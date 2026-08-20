@@ -45,22 +45,25 @@ public class OrderDocumentTextBuilder : IOrderDocumentTextBuilder
             var recency = RecencyPhrase(order.OrderDate);
             var dominantProduct = details.OrderByDescending(d => d.Total).First();
 
+            var itemWord = totalQty == 1 ? "item" : "items";
+            var productWord = details.Count == 1 ? "product" : "products";
+            var productPhrase = details.Count == 1
+                ? dominantProduct.ProductName
+                : string.Create(CultureInfo.InvariantCulture, $"{details.Count} {productWord}, the largest being {dominantProduct.ProductName} at {dominantProduct.Total:F2}");
+
+            var priceSpreadPhrase = minUnitPrice == maxUnitPrice
+                ? string.Create(CultureInfo.InvariantCulture, $"priced at {avgUnitPrice:F2} per unit")
+                : string.Create(CultureInfo.InvariantCulture, $"priced between {minUnitPrice:F2} and {maxUnitPrice:F2} per unit (averaging {avgUnitPrice:F2})");
+
             sb.AppendLine();
             sb.AppendLine("Summary:");
             sb.AppendLine(string.Create(CultureInfo.InvariantCulture,
-                $"This is a {valueTier}-value order placed {recency}, containing {details.Count} distinct product(s) and {totalQty} total item(s). Unit prices range from {minUnitPrice:F2} to {maxUnitPrice:F2}, averaging {avgUnitPrice:F2}."));
-
-            if (details.Count > 1)
-                sb.AppendLine("The customer purchased multiple products in this single order.");
-
-            if (details.Count > 1)
-                sb.AppendLine(string.Create(CultureInfo.InvariantCulture,
-                    $"The largest line item is {dominantProduct.ProductName}, accounting for {dominantProduct.Total:F2} of the order total."));
+                $"This {valueTier}-value order was placed {recency}. It includes {productPhrase}, totaling {totalQty} {itemWord}, {priceSpreadPhrase}."));
 
             var bulkItems = details.Where(d => d.OrderQty >= 5).ToList();
             if (bulkItems.Count > 0)
                 sb.AppendLine(string.Create(CultureInfo.InvariantCulture,
-                    $"This looks like a bulk purchase: {string.Join(", ", bulkItems.Select(d => $"{d.ProductName} (x{d.OrderQty})"))}."));
+                    $"It looks like a bulk purchase, with large quantities of {string.Join(", ", bulkItems.Select(d => $"{d.ProductName} (x{d.OrderQty})"))}."));
 
             sb.AppendLine(StatusPhrase(order.Status));
         }
