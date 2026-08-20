@@ -40,11 +40,11 @@ public static class DependencyInjection
 
         var ollamaSection = configuration.GetSection("Ollama");
         var ollamaEndpoint = new Uri(ollamaSection["Endpoint"] ?? "http://localhost:11434");
-        //var chatModel = ollamaSection["ChatModel"] ?? "llama3.1:8b";
-        //var embeddingModel = ollamaSection["EmbeddingModel"] ?? "nomic-embed-text:v1.5"; //embedding dimension 768
+        var chatModel = ollamaSection["ChatModel"] ?? "llama3.1:8b";
+        var embeddingModel = ollamaSection["EmbeddingModel"] ?? "nomic-embed-text:v1.5"; //embedding dimension 768
 
-        var chatModel = ollamaSection["ChatModel"] ?? "qwen3:8b";
-        var embeddingModel = ollamaSection["EmbeddingModel"] ?? "bge-m3:latest"; //embedding dimension 1024
+        //var chatModel = ollamaSection["ChatModel"] ?? "qwen3:8b";
+        //var embeddingModel = ollamaSection["EmbeddingModel"] ?? "bge-m3:latest"; //embedding dimension 1024
 
 
         services.AddKernel()
