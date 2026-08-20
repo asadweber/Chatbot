@@ -62,6 +62,21 @@ public static class SupportFaqKnowledge
         new("How do I create a new order?",
             ["create a new order", "how do i create an order", "add an order"],
             "Go to the Orders section and use the \"+ New Order\" button to create an order."),
+        new("How do I edit an order?",
+            ["edit an order", "how do i edit", "update an order", "change an order"],
+            "Go to the Orders section, open the order, and use the Edit action there. This chat is read-only and cannot modify orders."),
+        new("How do I delete an order?",
+            ["delete an order", "how do i delete", "remove an order"],
+            "Go to the Orders section and use the Delete action on the order. This chat is read-only and cannot delete orders."),
+        new("How do I find orders by description?",
+            ["find orders", "search for orders", "orders matching", "orders with"],
+            "Ask in plain language (e.g. \"high-value orders\" or \"orders with laptops\") and the system will search for semantically similar orders."),
+        new("Can this chat modify orders?",
+            ["can this chat modify", "can you modify", "can you update an order", "can you change an order"],
+            "No. This chat is read-only. Use the Orders section of the app to create, edit, or delete orders."),
+        new("When should I escalate a question?",
+            ["escalate", "escalation", "speak to a supervisor", "talk to a supervisor"],
+            "Escalate to a supervisor for anything about policy, disputes, or questions outside order status/contents/totals — don't guess."),
     ];
 
     /// <summary>All canned FAQ entries, for display in the Support Desk UI.</summary>

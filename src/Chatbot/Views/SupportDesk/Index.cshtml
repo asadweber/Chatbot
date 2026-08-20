@@ -64,6 +64,8 @@
                 form.requestSubmit();
             }
 
+            let sessionOrderId = null;
+
             startForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const orderId = orderIdInput.value.trim();
@@ -72,6 +74,7 @@
                     return;
                 }
 
+                sessionOrderId = orderId;
                 startCard.classList.add('d-none');
                 sessionArea.classList.remove('d-none');
                 loadFaqs();
@@ -79,28 +82,32 @@
                 askQuestion('What is the status of order #' + orderId + '?');
             });
 
+            function addFaqChip(question) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline-secondary btn-sm';
+                btn.textContent = question;
+                btn.addEventListener('click', function () { askQuestion(question); });
+                faqChips.appendChild(btn);
+            }
+
             async function loadFaqs() {
+                faqChips.innerHTML = '';
+
+                // Session-scoped: re-asks the current order's status rather
+                // than a static answer, so it must be added client-side
+                // instead of coming from the static FAQ list.
+                if (sessionOrderId) {
+                    addFaqChip('What is the current status of order #' + sessionOrderId + '?');
+                }
+
                 try {
                     const res = await fetch('@Url.Action("Faqs", "SupportDesk")');
                     if (!res.ok) throw new Error('FAQ request failed');
                     const faqs = await res.json();
-
-                    faqChips.innerHTML = '';
-                    if (faqs.length === 0) {
-                        faqChips.textContent = 'No FAQs available.';
-                        return;
-                    }
-
-                    faqs.forEach(function (faq) {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'btn btn-outline-secondary btn-sm';
-                        btn.textContent = faq.question;
-                        btn.addEventListener('click', function () { askQuestion(faq.question); });
-                        faqChips.appendChild(btn);
-                    });
+                    faqs.forEach(function (faq) { addFaqChip(faq.question); });
                 } catch {
-                    faqChips.textContent = 'Couldn\'t load FAQs.';
+                    if (!sessionOrderId) faqChips.textContent = 'Couldn\'t load FAQs.';
                 }
             }
 
