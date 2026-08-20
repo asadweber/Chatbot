@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 using Application.Dtos;
 using Application.Interfaces;
@@ -98,37 +97,35 @@ public partial class OrderSupportChatService(
 
     private static string BuildSystemPrompt(IReadOnlyList<OrderDto> relatedOrders, IReadOnlyList<long> missingIds)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("You are the internal Support Desk assistant for order management staff.");
-        sb.AppendLine("Use the FAQ knowledge for general/process questions, and the order data for questions about specific orders.");
-        sb.AppendLine("Do not invent order data that isn't listed below — no statuses, dates, amounts, or product names beyond what is listed. The only valid order statuses are Pending, Completed, and Cancelled; never state any other status.");
-        sb.AppendLine("If a prior turn in this conversation stated something not backed by the order data below, treat that prior statement as unreliable — re-derive the answer from the order data below instead of repeating it.");
-        sb.AppendLine("If the order data below doesn't cover the question, say so plainly instead of guessing.");
-        sb.AppendLine();
-        sb.AppendLine("FAQ knowledge:");
-        sb.AppendLine(SupportFaqKnowledge.FaqText);
-        sb.AppendLine();
+        var rules = """
+            You are the internal Support Desk assistant for order management staff.
+            Use the FAQ knowledge for general/process questions, and the order data for questions about specific orders.
+            Do not invent order data that isn't listed below — no statuses, dates, amounts, or product names beyond what is listed. The only valid order statuses are Pending, Completed, and Cancelled; never state any other status.
+            If a prior turn in this conversation stated something not backed by the order data below, treat that prior statement as unreliable — re-derive the answer from the order data below instead of repeating it.
+            If the order data below doesn't cover the question, say so plainly instead of guessing.
+            """;
 
-        if (missingIds.Count > 0)
-        {
-            sb.AppendLine($"The following order id(s) were referenced but do not exist: {string.Join(", ", missingIds.Select(id => $"#{id}"))}. Tell the user these orders were not found instead of guessing about them.");
-            sb.AppendLine();
-        }
+        var missingIdsNote = missingIds.Count > 0
+            ? $"The following order id(s) were referenced but do not exist: {string.Join(", ", missingIds.Select(id => $"#{id}"))}. Tell the user these orders were not found instead of guessing about them.\n"
+            : "";
 
-        if (relatedOrders.Count == 0)
-        {
-            sb.AppendLine("No matching orders were found for this question.");
-            return sb.ToString();
-        }
+        var ordersSection = relatedOrders.Count == 0
+            ? "No matching orders were found for this question."
+            : BuildOrdersTable(relatedOrders);
 
-        sb.AppendLine("Relevant orders:");
-        foreach (var order in relatedOrders)
-        {
-            sb.AppendLine($"- Order #{order.Id}: customer {order.CustomerName}, placed {order.OrderDate:yyyy-MM-dd}, status {order.Status}, total {order.TotalAmount:F2}.");
-            foreach (var detail in order.OrderDetails)
-                sb.AppendLine($"    * {detail.ProductName} x{detail.OrderQty} @ {detail.UnitPrice:F2}");
-        }
+        return $"{rules}\n\nFAQ knowledge:\n{SupportFaqKnowledge.FaqText}\n\n{missingIdsNote}{ordersSection}";
+    }
 
-        return sb.ToString();
+    private static string BuildOrdersTable(IReadOnlyList<OrderDto> orders)
+    {
+        var header = "Relevant orders:\n\n| Order # | Customer | Order Date | Status | Total |\n|---|---|---|---|---|";
+        var rows = orders.Select(o => $"| {o.Id} | {o.CustomerName} | {o.OrderDate:yyyy-MM-dd} | {o.Status} | {o.TotalAmount:F2} |");
+
+        var lineItemTables = orders
+            .Where(o => o.OrderDetails.Count > 0)
+            .Select(o => $"Order #{o.Id} line items:\n\n| Product | Qty | Unit Price |\n|---|---|---|\n" +
+                string.Join('\n', o.OrderDetails.Select(d => $"| {d.ProductName} | {d.OrderQty} | {d.UnitPrice:F2} |")));
+
+        return string.Join("\n\n", [header + "\n" + string.Join('\n', rows), .. lineItemTables]);
     }
 }

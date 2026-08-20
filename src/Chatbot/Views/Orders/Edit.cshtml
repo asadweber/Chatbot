@@ -1,4 +1,5 @@
 @model Application.Dtos.OrderDto
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Edit Order";
 }
@@ -31,7 +32,15 @@
                 </div>
                 <div class="col-md-4">
                     <label asp-for="Status" class="form-label small fw-semibold text-muted">Status</label>
-                    <input asp-for="Status" class="form-control" />
+                    @{
+                        var statusOptions = new[] { "Pending", "Completed", "Cancelled" };
+                        var selectList = statusOptions.Contains(Model.Status)
+                            ? statusOptions.Select(s => new SelectListItem(s, s)).ToList()
+                            : statusOptions.Select(s => new SelectListItem(s, s))
+                                .Append(new SelectListItem(Model.Status, Model.Status))
+                                .ToList();
+                    }
+                    <select asp-for="Status" asp-items="selectList" class="form-control"></select>
                 </div>
             </div>
         </div>
