@@ -16,7 +16,7 @@
         <form id="chatForm" class="d-flex gap-2">
             @Html.AntiForgeryToken()
             <input type="text" id="questionInput" class="form-control"
-                   placeholder="e.g. Which customers placed large orders recently?" autocomplete="off" />
+                   placeholder="" autocomplete="off" />
             <button type="submit" class="btn btn-hero px-4 fw-semibold">Ask</button>
         </form>
     </div>
@@ -48,15 +48,6 @@
                 log.scrollTop = log.scrollHeight;
             }
 
-            function appendOrders(orders) {
-                if (!orders || !orders.length) return;
-                const wrap = document.createElement('div');
-                wrap.className = 'mb-3 small text-muted';
-                wrap.textContent = 'Related orders: ' + orders.map(o => '#' + o.id + ' (' + o.customerName + ')').join(', ');
-                log.appendChild(wrap);
-                log.scrollTop = log.scrollHeight;
-            }
-
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const question = input.value.trim();
@@ -83,7 +74,6 @@
 
                     const data = await res.json();
                     appendMessage('assistant', data.answer);
-                    appendOrders(data.orders);
 
                     history.push({ role: 'user', content: question });
                     history.push({ role: 'assistant', content: data.answer });
