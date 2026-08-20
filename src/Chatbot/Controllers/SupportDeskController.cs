@@ -15,6 +15,7 @@ public class SupportDeskController(IOrderSupportChatService supportChat) : Contr
     {
         ViewData["CustomerDetailQuestionTemplate"] = SupportFaqKnowledge.CustomerDetailQuestionTemplate;
         ViewData["CurrentStatusQuestionTemplate"] = SupportFaqKnowledge.CurrentStatusQuestionTemplate;
+        ViewData["OrderDetailQuestionTemplate"] = SupportFaqKnowledge.OrderDetailQuestionTemplate;
         return View();
     }
 
@@ -53,7 +54,14 @@ public class SupportDeskController(IOrderSupportChatService supportChat) : Contr
                 o.CustomerName,
                 o.OrderDate,
                 o.Status,
-                o.TotalAmount
+                o.TotalAmount,
+                orderDetails = o.OrderDetails.Select(d => new
+                {
+                    d.ProductName,
+                    d.OrderQty,
+                    d.UnitPrice,
+                    d.Total
+                })
             })
         });
     }

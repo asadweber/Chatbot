@@ -88,6 +88,7 @@
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
             const customerDetailQuestionTemplate = '@Html.Raw(ViewData["CustomerDetailQuestionTemplate"])';
             const currentStatusQuestionTemplate = '@Html.Raw(ViewData["CurrentStatusQuestionTemplate"])';
+            const orderDetailQuestionTemplate = '@Html.Raw(ViewData["OrderDetailQuestionTemplate"])';
             const history = [];
 
             function formatQuestion(template, orderId) {
@@ -143,6 +144,7 @@
                 if (sessionOrderId) {
                     addFaqChip(formatQuestion(customerDetailQuestionTemplate, sessionOrderId));
                     addFaqChip(formatQuestion(currentStatusQuestionTemplate, sessionOrderId));
+                    addFaqChip(formatQuestion(orderDetailQuestionTemplate, sessionOrderId));
                 }
 
                 try {
@@ -173,6 +175,49 @@
                 span.textContent = text;
                 wrap.appendChild(span);
 
+                log.appendChild(wrap);
+                log.scrollTop = log.scrollHeight;
+            }
+
+            function appendOrderDetailsTable(orderDetails) {
+                const wrap = document.createElement('div');
+                wrap.className = 'mb-2 table-responsive';
+
+                const table = document.createElement('table');
+                table.className = 'table table-sm table-bordered mb-0';
+
+                const thead = document.createElement('thead');
+                thead.innerHTML = '<tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Unit Price</th><th class="text-end">Total</th></tr>';
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                orderDetails.forEach(function (d) {
+                    const tr = document.createElement('tr');
+
+                    const productCell = document.createElement('td');
+                    productCell.textContent = d.productName;
+                    tr.appendChild(productCell);
+
+                    const qtyCell = document.createElement('td');
+                    qtyCell.className = 'text-end';
+                    qtyCell.textContent = d.orderQty;
+                    tr.appendChild(qtyCell);
+
+                    const priceCell = document.createElement('td');
+                    priceCell.className = 'text-end';
+                    priceCell.textContent = d.unitPrice.toFixed(2);
+                    tr.appendChild(priceCell);
+
+                    const totalCell = document.createElement('td');
+                    totalCell.className = 'text-end';
+                    totalCell.textContent = d.total.toFixed(2);
+                    tr.appendChild(totalCell);
+
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+
+                wrap.appendChild(table);
                 log.appendChild(wrap);
                 log.scrollTop = log.scrollHeight;
             }
@@ -238,6 +283,15 @@
 
                     const data = await res.json();
                     appendMessage('assistant', data.answer);
+
+                    const isOrderDetailQuestion = sessionOrderId &&
+                        question === formatQuestion(orderDetailQuestionTemplate, sessionOrderId);
+                    if (isOrderDetailQuestion) {
+                        const order = (data.orders || []).find(function (o) { return String(o.id) === String(sessionOrderId); });
+                        if (order && order.orderDetails && order.orderDetails.length > 0) {
+                            appendOrderDetailsTable(order.orderDetails);
+                        }
+                    }
 
                     history.push({ role: 'user', content: question });
                     history.push({ role: 'assistant', content: data.answer });

@@ -41,6 +41,7 @@ public static class SupportFaqKnowledge
     // answer. {0} is replaced with the order id.
     public const string CustomerDetailQuestionTemplate = "What is the customer detail of order #{0}?";
     public const string CurrentStatusQuestionTemplate = "What is the current status of order #{0}?";
+    public const string OrderDetailQuestionTemplate = "What are the order details of order #{0}?";
 
     // Exact/keyword canned answers for the most common support questions,
     // checked before the FAQ text is even sent to the LLM. Keywords are
