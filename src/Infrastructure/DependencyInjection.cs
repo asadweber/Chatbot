@@ -38,7 +38,6 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString, npgsql => npgsql.UseVector()));
 
         services.AddScoped<IDocumentRepository, DocumentRepository>();
-        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
         var ollamaSection = configuration.GetSection("Ollama");
         var ollamaEndpoint = new Uri(ollamaSection["Endpoint"] ?? "http://localhost:11434");

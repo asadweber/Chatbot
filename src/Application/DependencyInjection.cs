@@ -26,10 +26,6 @@ public static class DependencyInjection
         // Infrastructure to avoid Infrastructure needing a ProjectReference back
         // to Application.
         services.AddScoped<IEmbeddingService, EmbeddingService>();
-        services.AddScoped<IChatService, OllamaChatService>();
-        services.AddScoped<IDocumentIngestionService, DocumentIngestionService>();
-        services.AddScoped<IRetrievalService, RetrievalService>();
-        services.AddScoped<IChatSessionService, ChatSessionService>();
 
         services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MapperProfile).Assembly));
 

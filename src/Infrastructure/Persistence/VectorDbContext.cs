@@ -13,21 +13,11 @@ public class VectorDbContext : DbContext
 {
     public VectorDbContext(DbContextOptions<VectorDbContext> options) : base(options) { }
 
-    /// <summary>Uploaded source documents.</summary>
-    public DbSet<Document> Documents => Set<Document>();
-
-    /// <summary>Text chunks extracted from documents, with their embeddings.</summary>
-    public DbSet<DocumentChunk> DocumentChunks => Set<DocumentChunk>();
-
+   
     /// <summary>Semantic (row-level) documents for orders, with their embeddings.</summary>
     public DbSet<OrderDocument> OrderDocuments => Set<OrderDocument>();
 
-    /// <summary>Chat conversations.</summary>
-    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
-
-    /// <summary>Individual messages within chat conversations.</summary>
-    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
-
+   
     /// <summary>
     /// Configures the pgvector extension and entity relationships: chunk
     /// embeddings as <c>vector(768)</c> columns, and cascade-delete
@@ -40,17 +30,7 @@ public class VectorDbContext : DbContext
         // (e.g. cosine distance "<=>") to be available in PostgreSQL.
         modelBuilder.HasPostgresExtension("vector");
 
-        modelBuilder.Entity<DocumentChunk>(entity =>
-        {
-            // 768 = embedding dimension produced by the configured Ollama
-            // embedding model (nomic-embed-text:v1.5 by default).
-            entity.Property(c => c.Embedding).HasColumnType("vector(768)");
-            entity.HasOne(c => c.Document)
-                  .WithMany(d => d.Chunks)
-                  .HasForeignKey(c => c.DocumentId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-
+       
         modelBuilder.Entity<OrderDocument>(entity =>
         {
             // 768 = embedding dimension produced by the configured Ollama
@@ -59,12 +39,6 @@ public class VectorDbContext : DbContext
             entity.HasIndex(d => d.OrderId).IsUnique();
         });
 
-        modelBuilder.Entity<ChatMessage>(entity =>
-        {
-            entity.HasOne(m => m.Session)
-                  .WithMany(s => s.Messages)
-                  .HasForeignKey(m => m.SessionId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
+       
     }
 }
