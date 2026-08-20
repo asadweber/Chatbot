@@ -21,26 +21,30 @@
     </div>
 </div>
 
-<div id="sessionArea" class="d-none">
-    <div class="card shadow border-0 orders-card mb-3">
-        <div class="card-body">
-            <h2 class="h6 fw-semibold mb-3">Frequently asked questions</h2>
-            <div id="faqChips" class="d-flex flex-wrap gap-2">
-                <span class="text-muted small">Loading FAQs...</span>
+<div id="sessionArea" class="d-none row g-3">
+    <div class="col-md-4 col-lg-3">
+        <div class="card shadow border-0 orders-card h-100">
+            <div class="card-body">
+                <h2 class="h6 fw-semibold mb-3">Frequently asked questions</h2>
+                <ul id="faqChips" class="list-group list-group-flush">
+                    <li class="list-group-item text-muted small">Loading FAQs...</li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <div class="card shadow border-0 orders-card">
-        <div class="card-body">
-            <div id="chatLog" class="mb-3" style="max-height: 55vh; overflow-y: auto;"></div>
+    <div class="col-md-8 col-lg-9">
+        <div class="card shadow border-0 orders-card">
+            <div class="card-body">
+                <div id="chatLog" class="mb-3" style="max-height: 55vh; overflow-y: auto;"></div>
 
-            <form id="chatForm" class="d-flex gap-2">
-                @Html.AntiForgeryToken()
-                <input type="text" id="questionInput" class="form-control"
-                       placeholder="" autocomplete="off" />
-                <button type="submit" class="btn btn-hero px-4 fw-semibold">Ask</button>
-            </form>
+                <form id="chatForm" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="text" id="questionInput" class="form-control"
+                           placeholder="" autocomplete="off" />
+                    <button type="submit" class="btn btn-hero px-4 fw-semibold">Ask</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -83,12 +87,17 @@
             });
 
             function addFaqChip(question) {
+                const li = document.createElement('li');
+                li.className = 'list-group-item list-group-item-action p-0';
+
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'btn btn-outline-secondary btn-sm';
+                btn.className = 'btn btn-link text-start text-decoration-none w-100 px-2 py-2';
                 btn.textContent = question;
                 btn.addEventListener('click', function () { askQuestion(question); });
-                faqChips.appendChild(btn);
+
+                li.appendChild(btn);
+                faqChips.appendChild(li);
             }
 
             async function loadFaqs() {
@@ -99,6 +108,7 @@
                 // instead of coming from the static FAQ list.
                 if (sessionOrderId) {
                     addFaqChip('What is the customer detail of order #' + sessionOrderId + '?');
+                    addFaqChip('What is the current status of order #' + sessionOrderId + '?');
                 }
 
                 try {
